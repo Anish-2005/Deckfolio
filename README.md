@@ -1,20 +1,33 @@
-# Deckfolio
+## Deckfolio (Next.js + Tailwind)
 
-Minimal, recruiter-ready microsite to showcase two Smart India Hackathon finalist decks and two internal project decks.
+Deckfolio is a recruiter-ready showcase for two Smart India Hackathon finalist decks and two internal decks, powered by Next.js 14 (App Router), TypeScript, and Tailwind CSS v4.
 
-## Getting Started
+## Development
 
-Open `index.html` in any browser or serve the folder via a static host (GitHub Pages, Netlify, Vercel, etc.). The site is fully static—no build tooling required.
+```bash
+npm install          # first-time setup
+npm run dev          # start local server on http://localhost:3000
+npm run lint         # lint with ESLint
+npm run build        # production build
+```
 
-## Customizing Deck Entries
+## Content Model
 
-1. Duplicate one of the `<article class="deck-card">` blocks in `index.html`.
-2. Update the title, description, metadata list items, and button links. Point the `View Deck` button to your PPT/PDF file.
-3. Optionally adjust badges and years to match the deck type (SIH finalist vs. internal).
+- `src/app/page.tsx` holds the `deckCollections` data structure. Each entry includes:
+	- `label`, `title`, `description`, and `accent` for the section
+	- `decks[]` with badges, summary, metadata, and button links
+- `src/app/globals.css` contains brand colors, gradients, and typography adjustments.
 
-## Structure
+To add another presentation, duplicate a deck object inside the relevant collection or create a new collection block if you need a fresh category (e.g., "Startup Pitch Decks").
 
-- `index.html` – layout + copy for hero, SIH finalist section, and internal section.
-- `styles.css` – theme variables, layout, and motion.
+## Deployment
 
-Feel free to expand with additional sections like “Startup Pitch Decks” or “Research Posters” by duplicating the existing section markup.
+Deploy to any static-friendly host:
+
+1. `npm run build`
+2. `npm run start` locally to verify
+3. Push to GitHub and connect to Vercel/Netlify, or use `vercel --prod`
+
+## Assets
+
+Place your PPT/PDF exports or summary links inside `public/decks/` (or update the `href` fields to point to external storage). Update the `mailto:` CTA in `page.tsx` with your preferred inbox.
