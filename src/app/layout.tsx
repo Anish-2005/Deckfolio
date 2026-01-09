@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Deckfolio | Presentation Showcase",
   description:
     "Curated Smart India Hackathon finalist decks and internal presentation archive for recruiters and juries.",
+  icons: {
+    icon: "/deckfolio.png",
+    shortcut: "/deckfolio.png",
+    apple: "/deckfolio.png",
+  },
   openGraph: {
     title: "Deckfolio | Presentation Showcase",
     description:

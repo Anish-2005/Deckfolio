@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 type DeckMeta = {
   label: string;
@@ -141,9 +142,19 @@ export default function Home() {
       <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-16 px-6 pb-24 pt-10 lg:px-10">
         <header className="flex flex-col gap-10">
           <nav className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-muted)] px-5 py-3 backdrop-blur">
-            <span className="font-mono text-xs uppercase tracking-[0.4em] text-[color:var(--text-muted)]">
-              Deckfolio
-            </span>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/deckfolio.png"
+                width={56}
+                height={56}
+                alt="Deckfolio logo"
+                priority
+                className="drop-shadow-[0_8px_20px_rgba(15,23,42,0.2)]"
+              />
+              <span className="font-mono text-xs uppercase tracking-[0.4em] text-[color:var(--text-muted)]">
+                Deckfolio
+              </span>
+            </div>
             <div className="flex flex-wrap items-center gap-3">
               <ThemeToggle />
               <a
@@ -285,9 +296,18 @@ export default function Home() {
         </main>
 
         <footer className="rounded-[28px] border border-[color:var(--border-color)] bg-[color:var(--surface-base)] p-8 text-[color:var(--text-primary)] shadow-[0_10px_50px_rgba(0,0,0,0.15)]">
-          <p className="text-xs uppercase tracking-[0.5em] text-[color:var(--text-muted)]">
-            Need another deck?
-          </p>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/deckfolio.png"
+              width={48}
+              height={48}
+              alt="Deckfolio badge"
+              className="drop-shadow-[0_4px_12px_rgba(15,23,42,0.25)]"
+            />
+            <p className="text-xs uppercase tracking-[0.5em] text-[color:var(--text-muted)]">
+              Need another deck?
+            </p>
+          </div>
           <div className="mt-4 flex flex-col gap-4">
             <h2 className="text-3xl font-semibold">Future-ready presentations stay here.</h2>
             <p className="max-w-3xl text-base text-[color:var(--text-muted)]">

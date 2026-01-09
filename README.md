@@ -32,4 +32,5 @@ Deploy to any static-friendly host:
 
 ## Assets
 
-Place your PPT/PDF exports or summary links inside `public/decks/` (or update the `href` fields to point to external storage). Update the `mailto:` CTA in `page.tsx` with your preferred inbox.
+- Place your PPT/PDF exports or summary links inside `public/decks/` (or update the `href` fields to point to external storage). Update the `mailto:` CTA in `page.tsx` with your preferred inbox.
+- Replace `public/deckfolio.svg` with your official Deckfolio logo asset (PNG/SVG). The nav, footer, and metadata icons all reference this file, so keeping the path consistent will update branding everywhere automatically.
