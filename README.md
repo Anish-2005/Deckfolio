@@ -16,7 +16,9 @@ npm run build        # production build
 - `src/app/page.tsx` holds the `deckCollections` data structure. Each entry includes:
 	- `label`, `title`, `description`, and `accent` for the section
 	- `decks[]` with badges, summary, metadata, and button links
+- The "Non-SIH Presentation Decks" collection ships empty with a "Coming Soon" card as a placeholder for future work.
 - `src/app/globals.css` contains brand colors, gradients, and typography adjustments.
+- Light/dark theming is powered by [`next-themes`](https://github.com/pacocoursey/next-themes). The toggle lives in `src/components/theme-toggle.tsx`, and the CSS variables that drive both palettes are defined in `globals.css`.
 
 To add another presentation, duplicate a deck object inside the relevant collection or create a new collection block if you need a fresh category (e.g., "Startup Pitch Decks").
 

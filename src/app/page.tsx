@@ -1,4 +1,11 @@
-import { ThemeToggle } from "@/components/theme-toggle";
+import dynamic from "next/dynamic";
+
+const ThemeToggle = dynamic(async () => {
+  const mod = await import("@/components/theme-toggle");
+  return mod.ThemeToggle;
+}, {
+  ssr: false,
+});
 type DeckMeta = {
   label: string;
   value: string;
@@ -48,7 +55,7 @@ const deckCollections: DeckCollection[] = [
           { label: "Tech Stack", value: "React Native · Expo · AI/ML" },
         ],
         primaryLink: { href: "/decks/sih-lawai.pdf", label: "View Deck" },
-        secondaryLink: { href: "https://github.com/Anish-2005/LawAI-Mobile", label: "View on GitHub" },
+        secondaryLink: { href: "https://github.com/Anish-2005/LawAI-PrivacyV", label: "View on GitHub" },
       },
       {
         title: "Nyantra: DBT Social Assistance Platform",
@@ -62,7 +69,7 @@ const deckCollections: DeckCollection[] = [
           { label: "Tech Stack", value: "Next.js · TypeScript · ML" },
         ],
         primaryLink: { href: "/decks/sih-nyantra.pdf", label: "View Deck" },
-        secondaryLink: { href: "https://anishseth.xyz/#projects", label: "Project Overview" },
+        secondaryLink: { href: "https://github.com/Anish-2005/Nyantra", label: "Project Overview" },
       },
     ],
   },
@@ -100,7 +107,7 @@ const deckCollections: DeckCollection[] = [
           { label: "Tech Stack", value: "React · FastAPI · MongoDB" },
         ],
         primaryLink: { href: "/decks/internal-chatbot-ticketing.pdf", label: "View Deck" },
-        secondaryLink: { href: "https://anishseth.xyz/#projects", label: "Project Overview" },
+        secondaryLink: { href: "https://github.com/Anish-2005/Online-Chatbot-Based-Ticketing-System", label: "Project Overview" },
       },
     ],
   },
@@ -191,21 +198,21 @@ export default function Home() {
           {deckCollections.map((collection) => (
             <section
               key={collection.id}
-              className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(8,10,18,0.65)] sm:p-10"
+              className="relative overflow-hidden rounded-[28px] border border-[color:var(--border-color)] bg-[color:var(--surface-base)] p-6 shadow-[0_20px_80px_rgba(8,10,18,0.15)] transition-colors sm:p-10"
             >
               <div
-                className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${collection.accent} opacity-70 blur-[160px]`}
+                className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${collection.accent} opacity-60 blur-[160px]`}
                 aria-hidden
               />
               <div className="flex flex-col gap-4">
-                <p className="text-xs uppercase tracking-[0.5em] text-white/60">
+                <p className="text-xs uppercase tracking-[0.5em] text-[color:var(--text-muted)]">
                   {collection.label}
                 </p>
                 <div className="flex flex-col gap-3">
-                  <h2 className="text-3xl font-semibold text-white">
+                  <h2 className="text-3xl font-semibold text-[color:var(--text-primary)]">
                     {collection.title}
                   </h2>
-                  <p className="max-w-3xl text-base leading-relaxed text-white/70">
+                  <p className="max-w-3xl text-base leading-relaxed text-[color:var(--text-muted)]">
                     {collection.description}
                   </p>
                 </div>
@@ -216,31 +223,33 @@ export default function Home() {
                   {collection.decks.map((deck) => (
                     <article
                       key={deck.title}
-                      className="group relative flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+                      className="group relative flex flex-col gap-5 rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--surface-card)] p-6 backdrop-blur"
                     >
-                      <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/70">
-                        <span className="rounded-full border border-white/20 px-3 py-1 text-[0.65rem]">
+                      <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-[color:var(--text-muted)]">
+                        <span className="rounded-full border border-[color:var(--border-color)] px-3 py-1 text-[0.65rem] text-[color:var(--text-primary)]">
                           {deck.badge}
                         </span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.65rem]">
+                        <span className="rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-muted)] px-3 py-1 text-[0.65rem] text-[color:var(--text-primary)]">
                           {deck.tag}
                         </span>
                       </div>
                       <div>
-                        <h3 className="text-2xl font-semibold text-white">
+                        <h3 className="text-2xl font-semibold text-[color:var(--text-primary)]">
                           {deck.title}
                         </h3>
-                        <p className="mt-3 text-base leading-relaxed text-white/70">
+                        <p className="mt-3 text-base leading-relaxed text-[color:var(--text-muted)]">
                           {deck.summary}
                         </p>
                       </div>
-                      <ul className="flex flex-col gap-4 text-sm text-white/70">
+                      <ul className="flex flex-col gap-4 text-sm text-[color:var(--text-muted)]">
                         {deck.meta.map((item) => (
                           <li key={item.label}>
-                            <span className="block text-[0.65rem] uppercase tracking-[0.4em] text-white/50">
+                            <span className="block text-[0.65rem] uppercase tracking-[0.4em] text-[color:var(--text-muted)] opacity-70">
                               {item.label}
                             </span>
-                            <span className="text-base text-white">{item.value}</span>
+                            <span className="text-base text-[color:var(--text-primary)]">
+                              {item.value}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -254,23 +263,25 @@ export default function Home() {
                         {deck.secondaryLink && (
                           <a
                             href={deck.secondaryLink.href}
-                            className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/25 px-4 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+                            className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[color:var(--border-color)] px-4 py-3 text-sm font-semibold text-[color:var(--text-primary)] transition hover:border-[color:var(--border-strong)] hover:bg-[color:var(--surface-muted)]"
                           >
                             {deck.secondaryLink.label}
                           </a>
                         )}
                       </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-3xl border border-white/5 opacity-0 transition group-hover:opacity-100" />
+                      <div className="pointer-events-none absolute inset-0 rounded-3xl border border-[color:var(--border-strong)] opacity-0 transition group-hover:opacity-100" />
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="mt-10 rounded-3xl border border-dashed border-white/20 bg-white/5 p-8 text-center text-white/70">
-                  <p className="text-sm uppercase tracking-[0.4em] text-white/50">Coming Soon</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-white">
+                <div className="mt-10 rounded-3xl border border-dashed border-[color:var(--border-color)] bg-[color:var(--surface-muted)] p-8 text-center text-[color:var(--text-muted)]">
+                  <p className="text-sm uppercase tracking-[0.4em] text-[color:var(--text-muted)] opacity-80">
+                    Coming Soon
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold text-[color:var(--text-primary)]">
                     Curating flagship non-SIH decks
                   </h3>
-                  <p className="mt-2 text-base text-white/70">
+                  <p className="mt-2 text-base text-[color:var(--text-muted)]">
                     Startup pitch decks, proof-of-concept walkthroughs, and client innovation reviews will be added
                     here shortly.
                   </p>
@@ -280,26 +291,26 @@ export default function Home() {
           ))}
         </main>
 
-        <footer className="rounded-[28px] border border-white/10 bg-white/[0.04] p-8 text-white shadow-[0_10px_50px_rgba(0,0,0,0.45)]">
-          <p className="text-xs uppercase tracking-[0.5em] text-white/60">
+        <footer className="rounded-[28px] border border-[color:var(--border-color)] bg-[color:var(--surface-base)] p-8 text-[color:var(--text-primary)] shadow-[0_10px_50px_rgba(0,0,0,0.15)]">
+          <p className="text-xs uppercase tracking-[0.5em] text-[color:var(--text-muted)]">
             Need another deck?
           </p>
           <div className="mt-4 flex flex-col gap-4">
             <h2 className="text-3xl font-semibold">Future-ready presentations stay here.</h2>
-            <p className="max-w-3xl text-base text-white/70">
+            <p className="max-w-3xl text-base text-[color:var(--text-muted)]">
               Extend Deckfolio with Proof-of-Concepts, Startup Pitch Decks, or Research Posters. Duplicate any card,
               swap the metadata, and point the button to your PPT or PDF.
             </p>
             <div className="flex flex-wrap gap-3">
               <a
                 href="mailto:anish@example.com?subject=Deckfolio%20Collaboration"
-                className="rounded-2xl bg-gradient-to-r from-sky-400 to-emerald-300 px-5 py-3 text-sm font-semibold text-gray-900"
+                className="rounded-2xl bg-gradient-to-r from-sky-400 to-emerald-300 px-5 py-3 text-sm font-semibold text-slate-900"
               >
                 Collaborate
               </a>
               <a
                 href="#collections"
-                className="rounded-2xl border border-white/25 px-5 py-3 text-sm font-semibold text-white hover:border-white"
+                className="rounded-2xl border border-[color:var(--border-color)] px-5 py-3 text-sm font-semibold text-[color:var(--text-primary)] hover:border-[color:var(--border-strong)]"
               >
                 Back to Decks
               </a>
