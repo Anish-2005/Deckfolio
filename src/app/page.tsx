@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/theme-toggle";
 type DeckMeta = {
   label: string;
   value: string;
@@ -20,6 +21,7 @@ type DeckCollection = {
   description: string;
   accent: string;
   decks: Deck[];
+  comingSoon?: boolean;
 };
 
 const deckCollections: DeckCollection[] = [
@@ -102,6 +104,16 @@ const deckCollections: DeckCollection[] = [
       },
     ],
   },
+  {
+    id: "non-sih",
+    label: "Selected Work",
+    title: "Non-SIH Presentation Decks",
+    description:
+      "Pitch decks and innovation presentations outside the Smart India Hackathon track. This space will showcase flagship client and startup decks soon.",
+    accent: "from-purple-400/20 via-pink-400/10 to-transparent",
+    decks: [],
+    comingSoon: true,
+  },
 ];
 
 const totalDecks = deckCollections.reduce(
@@ -117,31 +129,32 @@ const heroStats = [
 
 export default function Home() {
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-[#05060a]">
+    <div className="relative isolate min-h-screen overflow-hidden bg-[color:var(--page-bg)] transition-colors">
       <div
         className="pointer-events-none absolute inset-0 -z-10 opacity-80"
         aria-hidden
       >
-        <div className="absolute left-0 top-0 h-80 w-80 -translate-y-20 translate-x-10 rounded-full bg-cyan-400/20 blur-[140px]" />
-        <div className="absolute right-0 top-16 h-72 w-72 translate-x-10 rounded-full bg-emerald-300/20 blur-[140px]" />
+        <div className="absolute left-0 top-0 h-80 w-80 -translate-y-20 translate-x-10 rounded-full bg-[color:var(--glow-cyan)] blur-[140px]" />
+        <div className="absolute right-0 top-16 h-72 w-72 translate-x-10 rounded-full bg-[color:var(--glow-emerald)] blur-[140px]" />
       </div>
 
       <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-16 px-6 pb-24 pt-10 lg:px-10">
         <header className="flex flex-col gap-10">
-          <nav className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
-            <span className="font-mono text-xs uppercase tracking-[0.4em] text-white/70">
+          <nav className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-muted)] px-5 py-3 backdrop-blur">
+            <span className="font-mono text-xs uppercase tracking-[0.4em] text-[color:var(--text-muted)]">
               Deckfolio
             </span>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <ThemeToggle />
               <a
                 href="#collections"
-                className="rounded-full border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:border-white hover:bg-white/10"
+                className="rounded-full border border-[color:var(--border-color)] px-4 py-2 text-sm font-medium text-[color:var(--text-primary)] transition hover:border-[color:var(--border-strong)] hover:bg-[color:var(--surface-card)]"
               >
                 View Decks
               </a>
               <a
                 href="mailto:anish@example.com?subject=Deckfolio%20Inquiry"
-                className="rounded-full bg-gradient-to-r from-emerald-300 to-cyan-400 px-4 py-2 text-sm font-medium text-gray-900 transition hover:shadow-lg"
+                className="rounded-full bg-gradient-to-r from-emerald-300 to-cyan-400 px-4 py-2 text-sm font-medium text-slate-900 transition hover:shadow-lg"
               >
                 Request Case Study
               </a>
@@ -150,22 +163,22 @@ export default function Home() {
 
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
-              <p className="text-xs uppercase tracking-[0.6em] text-white/60">
+              <p className="text-xs uppercase tracking-[0.6em] text-[color:var(--text-muted)]">
                 Presentation Showcase
               </p>
-              <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl">
+              <h1 className="text-4xl font-semibold leading-tight text-[color:var(--text-primary)] sm:text-5xl">
                 Smart India Hackathon finalist decks + internal innovations, in one recruiter-ready lane.
               </h1>
-              <p className="max-w-3xl text-lg leading-relaxed text-white/70">
+              <p className="max-w-3xl text-lg leading-relaxed text-[color:var(--text-muted)]">
                 Each deck card links directly to the slide file you want decision makers to see first. Clean naming,
                 quick context, and portfolio polish for juries, recruiters, and faculty reviews.
               </p>
             </div>
-            <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm uppercase tracking-[0.3em] text-white/60 sm:grid-cols-3">
+            <div className="grid gap-4 rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--surface-base)] p-6 text-sm uppercase tracking-[0.3em] text-[color:var(--text-muted)] sm:grid-cols-3">
               {heroStats.map((stat) => (
                 <div key={stat.label} className="flex flex-col gap-2 text-left">
                   <span>{stat.label}</span>
-                  <span className="text-2xl font-semibold tracking-normal text-white">
+                  <span className="text-2xl font-semibold tracking-normal text-[color:var(--text-primary)]">
                     {stat.value}
                   </span>
                 </div>
@@ -198,58 +211,71 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-10 grid gap-6 md:grid-cols-2">
-                {collection.decks.map((deck) => (
-                  <article
-                    key={deck.title}
-                    className="group relative flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
-                  >
-                    <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/70">
-                      <span className="rounded-full border border-white/20 px-3 py-1 text-[0.65rem]">
-                        {deck.badge}
-                      </span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.65rem]">
-                        {deck.tag}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-semibold text-white">
-                        {deck.title}
-                      </h3>
-                      <p className="mt-3 text-base leading-relaxed text-white/70">
-                        {deck.summary}
-                      </p>
-                    </div>
-                    <ul className="flex flex-col gap-4 text-sm text-white/70">
-                      {deck.meta.map((item) => (
-                        <li key={item.label}>
-                          <span className="block text-[0.65rem] uppercase tracking-[0.4em] text-white/50">
-                            {item.label}
-                          </span>
-                          <span className="text-base text-white">{item.value}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex flex-wrap gap-3 pt-1">
-                      <a
-                        href={deck.primaryLink.href}
-                        className="inline-flex flex-1 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-300 to-cyan-400 px-4 py-3 text-sm font-semibold text-gray-900 transition hover:shadow-lg"
-                      >
-                        {deck.primaryLink.label}
-                      </a>
-                      {deck.secondaryLink && (
+              {collection.decks.length > 0 ? (
+                <div className="mt-10 grid gap-6 md:grid-cols-2">
+                  {collection.decks.map((deck) => (
+                    <article
+                      key={deck.title}
+                      className="group relative flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+                    >
+                      <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/70">
+                        <span className="rounded-full border border-white/20 px-3 py-1 text-[0.65rem]">
+                          {deck.badge}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.65rem]">
+                          {deck.tag}
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-semibold text-white">
+                          {deck.title}
+                        </h3>
+                        <p className="mt-3 text-base leading-relaxed text-white/70">
+                          {deck.summary}
+                        </p>
+                      </div>
+                      <ul className="flex flex-col gap-4 text-sm text-white/70">
+                        {deck.meta.map((item) => (
+                          <li key={item.label}>
+                            <span className="block text-[0.65rem] uppercase tracking-[0.4em] text-white/50">
+                              {item.label}
+                            </span>
+                            <span className="text-base text-white">{item.value}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="flex flex-wrap gap-3 pt-1">
                         <a
-                          href={deck.secondaryLink.href}
-                          className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/25 px-4 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+                          href={deck.primaryLink.href}
+                          className="inline-flex flex-1 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-300 to-cyan-400 px-4 py-3 text-sm font-semibold text-gray-900 transition hover:shadow-lg"
                         >
-                          {deck.secondaryLink.label}
+                          {deck.primaryLink.label}
                         </a>
-                      )}
-                    </div>
-                    <div className="pointer-events-none absolute inset-0 rounded-3xl border border-white/5 opacity-0 transition group-hover:opacity-100" />
-                  </article>
-                ))}
-              </div>
+                        {deck.secondaryLink && (
+                          <a
+                            href={deck.secondaryLink.href}
+                            className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/25 px-4 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+                          >
+                            {deck.secondaryLink.label}
+                          </a>
+                        )}
+                      </div>
+                      <div className="pointer-events-none absolute inset-0 rounded-3xl border border-white/5 opacity-0 transition group-hover:opacity-100" />
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-10 rounded-3xl border border-dashed border-white/20 bg-white/5 p-8 text-center text-white/70">
+                  <p className="text-sm uppercase tracking-[0.4em] text-white/50">Coming Soon</p>
+                  <h3 className="mt-3 text-2xl font-semibold text-white">
+                    Curating flagship non-SIH decks
+                  </h3>
+                  <p className="mt-2 text-base text-white/70">
+                    Startup pitch decks, proof-of-concept walkthroughs, and client innovation reviews will be added
+                    here shortly.
+                  </p>
+                </div>
+              )}
             </section>
           ))}
         </main>
