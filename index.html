@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Deckfolio – curated showcase for Smart India Hackathon finalist decks and internal project presentations."
+    />
+    <title>Deckfolio | Presentation Showcase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Archivo:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="glow-background" aria-hidden="true"></div>
+    <header class="hero">
+      <nav class="nav">
+        <span class="logo">Deckfolio</span>
+        <a class="pill-link" href="#collections" aria-label="Jump to deck showcase">
+          View Decks
+        </a>
+      </nav>
+      <div class="hero__content">
+        <p class="eyebrow">Presentation Showcase</p>
+        <h1>Smart India Hackathon finalist decks + internal innovations.</h1>
+        <p class="lead">
+          A polished, recruiter-ready view of competition work and institutional proof-of-concepts.
+          Each deck card links directly to the slide file you want decision makers to see first.
+        </p>
+        <div class="hero__cta">
+          <a class="btn primary" href="mailto:anish@example.com?subject=Deckfolio%20Inquiry">
+            Request Full Case Study
+          </a>
+          <a class="btn ghost" href="#structure">Naming & Structure</a>
+        </div>
+      </div>
+      <div class="hero__meta">
+        <div>
+          <span class="meta-label">Total Decks</span>
+          <span class="meta-value">4</span>
+        </div>
+        <div>
+          <span class="meta-label">Focus Areas</span>
+          <span class="meta-value">GovTech · CampusOps</span>
+        </div>
+        <div>
+          <span class="meta-label">Last Updated</span>
+          <span class="meta-value">Jan 2026</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="collections">
+      <section class="collection">
+        <div class="collection__header">
+          <p class="eyebrow">National-Level Finalist (SIH)</p>
+          <div>
+            <h2>Smart India Hackathon – Finalist Decks</h2>
+            <p>
+              Built for juries and ministry stakeholders. These decks highlight clarity, measurable impact, and
+              implementation readiness.
+            </p>
+          </div>
+        </div>
+        <div class="deck-grid">
+          <article class="deck-card" style="--card-index: 0">
+            <div class="card-head">
+              <span class="badge">National Finalist</span>
+              <span class="badge badge-neutral">Urban Tech · 2025</span>
+            </div>
+            <h3>PulseShield — Emergency Response Network</h3>
+            <p>
+              Decision support system coordinating ambulances, police, and campus security with live telemetry and
+              automated triage scoring.
+            </p>
+            <ul class="meta-list">
+              <li><span>Problem Statement</span>SIH 2025 · Ministry of Home Affairs</li>
+              <li><span>Role</span>Product lead · UX · Demo build</li>
+              <li><span>Deck Length</span>22 slides</li>
+            </ul>
+            <div class="card-actions">
+              <a class="btn primary" href="decks/sih-pulseshield.pdf">View Deck</a>
+              <a class="btn ghost" href="https://example.com/pulseshield">Read Summary</a>
+            </div>
+          </article>
+
+          <article class="deck-card" style="--card-index: 1">
+            <div class="card-head">
+              <span class="badge">National Finalist</span>
+              <span class="badge badge-neutral">AgriTech · 2024</span>
+            </div>
+            <h3>AgroSense — Precision Farming OS</h3>
+            <p>
+              Satellite-guided irrigation scheduling, agronomy advisory, and credit-readiness scoring tailored for
+              smallholder cooperatives.
+            </p>
+            <ul class="meta-list">
+              <li><span>Problem Statement</span>SIH 2024 · Ministry of Agriculture</li>
+              <li><span>Role</span>Product narrative · Data modeling</li>
+              <li><span>Deck Length</span>18 slides</li>
+            </ul>
+            <div class="card-actions">
+              <a class="btn primary" href="decks/sih-agrosense.pdf">View Deck</a>
+              <a class="btn ghost" href="https://example.com/agrosense">Read Summary</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="collection" id="structure">
+        <div class="collection__header">
+          <p class="eyebrow">Internal & Academic</p>
+          <div>
+            <h2>Internal Project Decks</h2>
+            <p>
+              A clean home for institution-only walkthroughs, reviews, and research transfers. These deck names mirror
+              the campus documentation language for easy approvals.
+            </p>
+          </div>
+        </div>
+        <div class="deck-grid">
+          <article class="deck-card" style="--card-index: 2">
+            <div class="card-head">
+              <span class="badge">Internal Review</span>
+              <span class="badge badge-neutral">Ops · 2025</span>
+            </div>
+            <h3>CampusFlow — Facility Feedback Loop</h3>
+            <p>
+              Unified intake + analytics stack for hostels and labs with SLA-driven ticket routing and anonymized
+              satisfaction reporting.
+            </p>
+            <ul class="meta-list">
+              <li><span>Audience</span>Institute Innovation Council</li>
+              <li><span>Role</span>Process design · Prototype</li>
+              <li><span>Deck Length</span>15 slides</li>
+            </ul>
+            <div class="card-actions">
+              <a class="btn primary" href="decks/internal-campusflow.pdf">View Deck</a>
+              <a class="btn ghost" href="https://example.com/campusflow">Read Summary</a>
+            </div>
+          </article>
+
+          <article class="deck-card" style="--card-index: 3">
+            <div class="card-head">
+              <span class="badge">Academic Review</span>
+              <span class="badge badge-neutral">AI Lab · 2024</span>
+            </div>
+            <h3>InsightBeam — Institutional Data Room</h3>
+            <p>
+              Privacy-first knowledge base aggregating research posters, budgets, and lab assets with queryable metadata
+              for dean-level planning.
+            </p>
+            <ul class="meta-list">
+              <li><span>Audience</span>Academic Council</li>
+              <li><span>Role</span>Information architecture · Storytelling</li>
+              <li><span>Deck Length</span>17 slides</li>
+            </ul>
+            <div class="card-actions">
+              <a class="btn primary" href="decks/internal-insightbeam.pdf">View Deck</a>
+              <a class="btn ghost" href="https://example.com/insightbeam">Read Summary</a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="eyebrow">Need another deck?</p>
+      <div class="footer__content">
+        <h2>Future-ready presentations stay here.</h2>
+        <p>
+          Extend Deckfolio with additional categories like Proof-of-Concepts, Startup Pitch Decks, or Research Posters.
+          Duplicate any card, swap the metadata, and point the button to your PPT or PDF.
+        </p>
+        <a class="btn primary" href="mailto:anish@example.com?subject=Deckfolio%20Collaboration">Collaborate</a>
+      </div>
+    </footer>
+  </body>
+</html>
