@@ -1,11 +1,4 @@
-import dynamic from "next/dynamic";
-
-const ThemeToggle = dynamic(async () => {
-  const mod = await import("@/components/theme-toggle");
-  return mod.ThemeToggle;
-}, {
-  ssr: false,
-});
+import { ThemeToggle } from "@/components/theme-toggle";
 type DeckMeta = {
   label: string;
   value: string;
