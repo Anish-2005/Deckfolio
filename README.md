@@ -105,7 +105,7 @@ Deckfolio is designed to be easily extensible. To add your own presentations:
 
 Have a question about the finalist decks or want to collaborate on a case study?
 
-- **Email**: [anish@example.com](mailto:anish@example.com)
+- **Email**: [anishseth0510@gmail.com](mailto:anish@example.com)
 - **Project Repository**: [GitHub](https://github.com/Anish-2005)
 
 ---
