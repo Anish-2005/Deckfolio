@@ -106,39 +106,53 @@ a {
 
 /* ─── Ambient Background Grid ─── */
 .ambient-grid {
-  background-image: linear-gradient(
-      var(--border-color) 1px,
-      transparent 1px
-    ),
+  background-image: linear-gradient(var(--border-color) 1px,
+      transparent 1px),
     linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   background-size: 64px 64px;
-  mask-image: radial-gradient(
-    ellipse 70% 50% at 50% 0%,
-    black 20%,
-    transparent 100%
-  );
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 0%,
+      black 20%,
+      transparent 100%);
 }
 
 /* ─── Gradient Text ─── */
 .gradient-text {
-  background: linear-gradient(
-    135deg,
-    var(--accent-cyan),
-    var(--accent-violet)
-  );
+  background: linear-gradient(135deg,
+      var(--accent-cyan),
+      var(--accent-violet));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-text-warm {
-  background: linear-gradient(
-    135deg,
-    var(--accent-emerald),
-    var(--accent-cyan)
-  );
+  background: linear-gradient(135deg,
+      var(--accent-emerald),
+      var(--accent-cyan));
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-hero-text {
+  display: inline;
+  background: linear-gradient(135deg,
+      var(--accent-cyan),
+      var(--accent-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-footer-text {
+  display: inline;
+  background: linear-gradient(135deg,
+      var(--accent-emerald),
+      var(--accent-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
   -webkit-text-fill-color: transparent;
 }
 
@@ -258,51 +272,39 @@ a {
 
 /* ─── Section Accent Glows ─── */
 .section-glow-cyan {
-  background: radial-gradient(
-    ellipse 60% 40% at 20% 40%,
-    rgba(6, 182, 212, 0.08) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse 60% 40% at 20% 40%,
+      rgba(6, 182, 212, 0.08) 0%,
+      transparent 70%);
 }
 
 .section-glow-emerald {
-  background: radial-gradient(
-    ellipse 60% 40% at 80% 40%,
-    rgba(16, 185, 129, 0.08) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse 60% 40% at 80% 40%,
+      rgba(16, 185, 129, 0.08) 0%,
+      transparent 70%);
 }
 
 .section-glow-violet {
-  background: radial-gradient(
-    ellipse 60% 40% at 50% 40%,
-    rgba(139, 92, 246, 0.08) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse 60% 40% at 50% 40%,
+      rgba(139, 92, 246, 0.08) 0%,
+      transparent 70%);
 }
 
 [data-theme="dark"] .section-glow-cyan {
-  background: radial-gradient(
-    ellipse 60% 40% at 20% 40%,
-    rgba(34, 211, 238, 0.06) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse 60% 40% at 20% 40%,
+      rgba(34, 211, 238, 0.06) 0%,
+      transparent 70%);
 }
 
 [data-theme="dark"] .section-glow-emerald {
-  background: radial-gradient(
-    ellipse 60% 40% at 80% 40%,
-    rgba(52, 211, 153, 0.06) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse 60% 40% at 80% 40%,
+      rgba(52, 211, 153, 0.06) 0%,
+      transparent 70%);
 }
 
 [data-theme="dark"] .section-glow-violet {
-  background: radial-gradient(
-    ellipse 60% 40% at 50% 40%,
-    rgba(167, 139, 250, 0.06) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse 60% 40% at 50% 40%,
+      rgba(167, 139, 250, 0.06) 0%,
+      transparent 70%);
 }
 
 /* ─── Meta Item ─── */
@@ -319,11 +321,9 @@ a {
   width: 3px;
   height: 1rem;
   border-radius: 3px;
-  background: linear-gradient(
-    to bottom,
-    var(--accent-cyan),
-    var(--accent-emerald)
-  );
+  background: linear-gradient(to bottom,
+      var(--accent-cyan),
+      var(--accent-emerald));
   opacity: 0.5;
 }
 
@@ -376,11 +376,13 @@ a {
 
 /* ─── Scroll indicator pulse ─── */
 @keyframes pulse-glow {
+
   0%,
   100% {
     opacity: 0.6;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.05);
@@ -393,13 +395,16 @@ a {
 
 /* ─── Floating orb keyframes ─── */
 @keyframes float {
+
   0%,
   100% {
     transform: translate(0, 0);
   }
+
   33% {
     transform: translate(30px, -20px);
   }
+
   66% {
     transform: translate(-20px, 15px);
   }

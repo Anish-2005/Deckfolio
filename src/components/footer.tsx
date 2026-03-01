@@ -83,10 +83,11 @@ export function Footer() {
                         Future-ready presentations
                         <span
                             style={{
-                                background:
+                                backgroundImage:
                                     "linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan))",
                                 WebkitBackgroundClip: "text",
                                 backgroundClip: "text",
+                                color: "transparent",
                                 WebkitTextFillColor: "transparent",
                             }}
                         >
