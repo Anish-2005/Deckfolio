@@ -32,8 +32,14 @@ export function Footer() {
     return (
         <motion.footer
             ref={ref}
-            className="glass-panel relative overflow-hidden rounded-3xl p-8 sm:p-10 lg:p-12"
-            style={{ boxShadow: "var(--shadow-section)" }}
+            className="relative overflow-hidden rounded-3xl border p-8 sm:p-10 lg:p-12"
+            style={{
+                background: "var(--surface-base)",
+                borderColor: "var(--border-color)",
+                backdropFilter: "blur(24px) saturate(1.4)",
+                WebkitBackdropFilter: "blur(24px) saturate(1.4)",
+                boxShadow: "var(--shadow-section)",
+            }}
             variants={container}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
@@ -50,7 +56,10 @@ export function Footer() {
 
             <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
                 {/* Left column */}
-                <motion.div variants={fadeIn} className="flex flex-col gap-6 lg:max-w-lg">
+                <motion.div
+                    variants={fadeIn}
+                    className="flex flex-col gap-6 lg:max-w-lg"
+                >
                     <div className="flex items-center gap-3">
                         <Image
                             src="/deckfolio.png"
@@ -59,33 +68,65 @@ export function Footer() {
                             alt="Deckfolio badge"
                             className="rounded-lg"
                         />
-                        <span className="text-sm font-bold tracking-wide text-[color:var(--text-primary)]">
+                        <span
+                            className="text-sm font-bold tracking-wide"
+                            style={{ color: "var(--text-primary)" }}
+                        >
                             Deckfolio
                         </span>
                     </div>
 
-                    <h2 className="text-2xl font-bold leading-snug text-[color:var(--text-primary)] sm:text-3xl">
+                    <h2
+                        className="text-2xl font-bold leading-snug sm:text-3xl"
+                        style={{ color: "var(--text-primary)" }}
+                    >
                         Future-ready presentations
-                        <span className="gradient-text-warm"> live here.</span>
+                        <span
+                            style={{
+                                background:
+                                    "linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan))",
+                                WebkitBackgroundClip: "text",
+                                backgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                            }}
+                        >
+                            {" "}
+                            live here.
+                        </span>
                     </h2>
 
-                    <p className="text-sm leading-relaxed text-[color:var(--text-secondary)]">
+                    <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: "var(--text-secondary)" }}
+                    >
                         Extend Deckfolio with Proof-of-Concepts, Startup Pitch Decks, or
-                        Research Posters. Duplicate any card, swap the metadata, and point the
-                        button to your PPT or PDF.
+                        Research Posters. Duplicate any card, swap the metadata, and
+                        point the button to your PPT or PDF.
                     </p>
 
                     <div className="flex flex-wrap gap-2">
                         <a
                             href="mailto:anish@example.com?subject=Deckfolio%20Collaboration"
-                            className="btn-primary"
+                            className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 hover:-translate-y-px"
+                            style={{
+                                background:
+                                    "linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald))",
+                                color: "#041b16",
+                                boxShadow: "0 2px 12px rgba(6, 182, 212, 0.25)",
+                            }}
                         >
                             <Mail size={15} />
                             Collaborate
                         </a>
                         <button
                             onClick={scrollToTop}
-                            className="btn-secondary"
+                            className="inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition-all duration-300 hover:-translate-y-px"
+                            style={{
+                                borderColor: "var(--border-color)",
+                                color: "var(--text-primary)",
+                                background: "transparent",
+                                cursor: "pointer",
+                            }}
                             aria-label="Back to top"
                         >
                             <ArrowUp size={15} />
@@ -97,37 +138,51 @@ export function Footer() {
                 {/* Right column – links */}
                 <motion.div
                     variants={fadeIn}
-                    className="flex flex-col gap-5 text-sm text-[color:var(--text-secondary)]"
+                    className="flex flex-col gap-5 text-sm"
+                    style={{ color: "var(--text-secondary)" }}
                 >
-                    <span className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-[color:var(--text-muted)]">
+                    <span
+                        className="text-[0.6rem] font-semibold uppercase tracking-[0.2em]"
+                        style={{ color: "var(--text-muted)" }}
+                    >
                         Connect
                     </span>
                     <div className="flex flex-col gap-3">
-                        <a
-                            href="https://github.com/Anish-2005"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="animated-link inline-flex items-center gap-2 transition-colors hover:text-[color:var(--text-primary)]"
-                        >
-                            <Github size={15} />
-                            GitHub
-                        </a>
-                        <a
-                            href="https://linkedin.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="animated-link inline-flex items-center gap-2 transition-colors hover:text-[color:var(--text-primary)]"
-                        >
-                            <Linkedin size={15} />
-                            LinkedIn
-                        </a>
-                        <a
-                            href="mailto:anish@example.com"
-                            className="animated-link inline-flex items-center gap-2 transition-colors hover:text-[color:var(--text-primary)]"
-                        >
-                            <Mail size={15} />
-                            Email
-                        </a>
+                        {[
+                            {
+                                href: "https://github.com/Anish-2005",
+                                icon: <Github size={15} />,
+                                label: "GitHub",
+                            },
+                            {
+                                href: "https://linkedin.com",
+                                icon: <Linkedin size={15} />,
+                                label: "LinkedIn",
+                            },
+                            {
+                                href: "mailto:anish@example.com",
+                                icon: <Mail size={15} />,
+                                label: "Email",
+                            },
+                        ].map((link) => (
+                            <a
+                                key={link.label}
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="animated-link inline-flex items-center gap-2 transition-colors"
+                                style={{ color: "var(--text-secondary)" }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = "var(--text-primary)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color = "var(--text-secondary)";
+                                }}
+                            >
+                                {link.icon}
+                                {link.label}
+                            </a>
+                        ))}
                     </div>
                 </motion.div>
             </div>
@@ -135,12 +190,19 @@ export function Footer() {
             {/* Divider + copyright */}
             <motion.div
                 variants={fadeIn}
-                className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[color:var(--border-color)] pt-6 sm:flex-row"
+                className="mt-10 flex flex-col items-center justify-between gap-4 border-t pt-6 sm:flex-row"
+                style={{ borderColor: "var(--border-color)" }}
             >
-                <p className="text-xs text-[color:var(--text-muted)]">
+                <p
+                    className="text-xs"
+                    style={{ color: "var(--text-muted)" }}
+                >
                     © {new Date().getFullYear()} Deckfolio. Crafted with precision.
                 </p>
-                <p className="text-xs text-[color:var(--text-muted)]">
+                <p
+                    className="text-xs"
+                    style={{ color: "var(--text-muted)" }}
+                >
                     Built with Next.js · Framer Motion · Tailwind CSS
                 </p>
             </motion.div>

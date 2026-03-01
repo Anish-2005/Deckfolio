@@ -20,41 +20,85 @@ interface DeckCardProps {
     index: number;
 }
 
+function getAccentColors(accent: string) {
+    switch (accent) {
+        case "cyan":
+            return {
+                badgeBg: "rgba(6, 182, 212, 0.1)",
+                badgeBorder: "rgba(6, 182, 212, 0.2)",
+                badgeColor: "var(--accent-cyan)",
+            };
+        case "emerald":
+            return {
+                badgeBg: "rgba(16, 185, 129, 0.1)",
+                badgeBorder: "rgba(16, 185, 129, 0.2)",
+                badgeColor: "var(--accent-emerald)",
+            };
+        default:
+            return {
+                badgeBg: "rgba(139, 92, 246, 0.1)",
+                badgeBorder: "rgba(139, 92, 246, 0.2)",
+                badgeColor: "var(--accent-violet)",
+            };
+    }
+}
+
 export function DeckCard({ deck, accent, index }: DeckCardProps) {
-    const badgeClass =
-        accent === "cyan"
-            ? "badge-cyan"
-            : accent === "emerald"
-                ? "badge-emerald"
-                : "badge-violet";
+    const colors = getAccentColors(accent);
 
     return (
         <motion.article
             variants={cardVariants}
-            className="glass-card group relative flex flex-col gap-5 rounded-2xl p-6 sm:p-7"
+            className="group relative flex flex-col gap-5 rounded-2xl border p-6 transition-all duration-400 sm:p-7"
+            style={{
+                background: "var(--surface-card)",
+                borderColor: "var(--border-color)",
+                backdropFilter: "blur(16px) saturate(1.2)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.2)",
+                boxShadow: "var(--shadow-card)",
+            }}
+            whileHover={{
+                y: -3,
+                boxShadow: "var(--shadow-card-hover)",
+                borderColor: "var(--border-strong)",
+            }}
         >
-            {/* Hover glow overlay */}
-            <div
-                className={`pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 section-glow-${accent}`}
-                aria-hidden
-            />
-
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-                <span className={`badge ${badgeClass}`}>
+                <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.06em]"
+                    style={{
+                        background: colors.badgeBg,
+                        border: `1px solid ${colors.badgeBorder}`,
+                        color: colors.badgeColor,
+                    }}
+                >
                     {deck.badge}
                 </span>
-                <span className="badge">
+                <span
+                    className="inline-flex items-center rounded-full px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.06em]"
+                    style={{
+                        background: "var(--badge-bg)",
+                        border: "1px solid var(--badge-border)",
+                        color: "var(--text-secondary)",
+                    }}
+                >
                     {deck.tag}
                 </span>
             </div>
 
             {/* Title + Summary */}
             <div className="flex flex-col gap-3">
-                <h3 className="text-xl font-bold leading-snug text-[color:var(--text-primary)] sm:text-2xl">
+                <h3
+                    className="text-xl font-bold leading-snug sm:text-2xl"
+                    style={{ color: "var(--text-primary)" }}
+                >
                     {deck.title}
                 </h3>
-                <p className="text-sm leading-relaxed text-[color:var(--text-secondary)] sm:text-base">
+                <p
+                    className="text-sm leading-relaxed sm:text-base"
+                    style={{ color: "var(--text-secondary)" }}
+                >
                     {deck.summary}
                 </p>
             </div>
@@ -62,11 +106,25 @@ export function DeckCard({ deck, accent, index }: DeckCardProps) {
             {/* Meta */}
             <ul className="flex flex-col gap-3">
                 {deck.meta.map((item) => (
-                    <li key={item.label} className="meta-item">
-                        <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+                    <li key={item.label} className="relative pl-4">
+                        {/* Accent bar */}
+                        <span
+                            className="absolute left-0 top-1 h-4 w-[3px] rounded-full"
+                            style={{
+                                background: `linear-gradient(to bottom, var(--accent-cyan), var(--accent-emerald))`,
+                                opacity: 0.5,
+                            }}
+                        />
+                        <span
+                            className="block text-[0.6rem] font-semibold uppercase tracking-[0.18em]"
+                            style={{ color: "var(--text-muted)" }}
+                        >
                             {item.label}
                         </span>
-                        <span className="text-sm text-[color:var(--text-primary)]">
+                        <span
+                            className="text-sm"
+                            style={{ color: "var(--text-primary)" }}
+                        >
                             {item.value}
                         </span>
                     </li>
@@ -79,7 +137,13 @@ export function DeckCard({ deck, accent, index }: DeckCardProps) {
                     href={deck.primaryLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-primary flex-1"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300 hover:-translate-y-px"
+                    style={{
+                        background:
+                            "linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald))",
+                        color: "#041b16",
+                        boxShadow: "0 2px 12px rgba(6, 182, 212, 0.25)",
+                    }}
                 >
                     <FileText size={15} />
                     {deck.primaryLink.label}
@@ -89,7 +153,11 @@ export function DeckCard({ deck, accent, index }: DeckCardProps) {
                         href={deck.secondaryLink.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-secondary flex-1"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-all duration-300 hover:-translate-y-px"
+                        style={{
+                            borderColor: "var(--border-color)",
+                            color: "var(--text-primary)",
+                        }}
                     >
                         <ExternalLink size={15} />
                         {deck.secondaryLink.label}
