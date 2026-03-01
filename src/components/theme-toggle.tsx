@@ -2,40 +2,46 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sun, Moon } from "lucide-react";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   if (!mounted || !resolvedTheme) {
     return (
-      <button
-        type="button"
-        className="flex items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-muted)] px-4 py-2 text-xs font-medium uppercase tracking-[0.3em] text-[color:var(--text-muted)]"
-        aria-label="Theme toggle loading"
-        aria-disabled
-      >
-        ...
-      </button>
+      <div className="h-10 w-10 rounded-xl border border-[color:var(--border-color)] bg-[color:var(--surface-muted)]" />
     );
   }
 
   const isDark = resolvedTheme === "dark";
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label="Toggle theme"
-      className="flex items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-muted)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--text-muted)] transition hover:border-[color:var(--text-primary)]"
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[color:var(--border-color)] bg-[color:var(--surface-muted)] text-[color:var(--text-primary)] transition-colors hover:border-[color:var(--border-strong)] hover:bg-[color:var(--surface-card)]"
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.05 }}
     >
-      <span className="text-[color:var(--text-primary)]">{isDark ? "Light" : "Dark"}</span>
-      <span className="text-[color:var(--text-muted)]">Mode</span>
-    </button>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={isDark ? "moon" : "sun"}
+          initial={{ y: -10, opacity: 0, rotate: -90 }}
+          animate={{ y: 0, opacity: 1, rotate: 0 }}
+          exit={{ y: 10, opacity: 0, rotate: 90 }}
+          transition={{ duration: 0.2 }}
+          className="absolute"
+        >
+          {isDark ? <Moon size={18} /> : <Sun size={18} />}
+        </motion.span>
+      </AnimatePresence>
+    </motion.button>
   );
 }

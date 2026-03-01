@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
@@ -6,36 +6,74 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f9fc" },
+    { media: "(prefers-color-scheme: dark)", color: "#04060c" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
-  title: "Deckfolio | Presentation Showcase",
+  title: "Deckfolio — Presentation Showcase",
   description:
-    "Curated Smart India Hackathon finalist decks and internal presentation archive for recruiters and juries.",
+    "Curated Smart India Hackathon finalist decks and internal presentation archive for recruiters, juries, and faculty reviews.",
+  keywords: [
+    "Deckfolio",
+    "presentation portfolio",
+    "Smart India Hackathon",
+    "SIH decks",
+    "project showcase",
+    "pitch deck",
+  ],
+  authors: [{ name: "Anish" }],
+  creator: "Anish",
   icons: {
     icon: "/deckfolio.png",
     shortcut: "/deckfolio.png",
     apple: "/deckfolio.png",
   },
   openGraph: {
-    title: "Deckfolio | Presentation Showcase",
+    title: "Deckfolio — Presentation Showcase",
     description:
       "Smart India Hackathon finalist decks plus internal institutional presentations in one polished view.",
     url: "https://deckfolio.example.com",
     siteName: "Deckfolio",
+    type: "website",
+    locale: "en_US",
     images: [
       {
         url: "/og-deckfolio.png",
         width: 1200,
         height: 630,
-        alt: "Deckfolio hero preview",
+        alt: "Deckfolio – Presentation Showcase",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deckfolio — Presentation Showcase",
+    description:
+      "Curated SIH finalist decks and internal innovations in one recruiter-ready portfolio.",
+    images: ["/og-deckfolio.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
   },
   metadataBase: new URL("https://deckfolio.example.com"),
 };
@@ -47,7 +85,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
