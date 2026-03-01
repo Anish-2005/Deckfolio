@@ -12,6 +12,7 @@ export function ThemeProvider({
       attribute="data-theme"
       defaultTheme="dark"
       enableSystem={false}
+      disableTransitionOnChange={false}
       {...props}
     >
       {children}

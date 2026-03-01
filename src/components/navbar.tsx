@@ -22,7 +22,7 @@ export function Navbar() {
             className="fixed left-0 right-0 top-0 z-50"
             initial={{ y: -80 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
         >
             <motion.div
                 className="border-b transition-all duration-500"
