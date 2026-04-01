@@ -32,10 +32,14 @@ export default function Home() {
           fallback={
             <section className="section-shell overflow-hidden p-6 sm:p-8">
               <div className="collection-glow collection-glow-cyan" aria-hidden />
-              <div className="empty-state">
-                <h2 className="text-xl font-semibold text-[color:var(--text-strong)]">
-                  Loading deck explorer...
-                </h2>
+              <div className="explorer-skeleton-stack" aria-hidden>
+                <div className="explorer-skeleton skeleton-title" />
+                <div className="explorer-skeleton skeleton-line" />
+                <div className="explorer-skeleton skeleton-line short" />
+                <div className="explorer-skeleton-grid">
+                  <div className="explorer-skeleton skeleton-card" />
+                  <div className="explorer-skeleton skeleton-card" />
+                </div>
               </div>
             </section>
           }

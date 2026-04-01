@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Check, Copy, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { CollectionSection } from "@/components/collection-section";
 import type { Deck, DeckCollection } from "@/lib/types";
 
@@ -258,6 +259,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
   const deferredSearch = useDeferredValue(searchQuery);
   const normalizedQuery = deferredSearch.trim().toLowerCase();
   const searchTokens = useMemo(() => tokenize(normalizedQuery), [normalizedQuery]);
+  const isResultsUpdating = deferredSearch !== searchQuery;
 
   const indexedCollections = useMemo(
     () =>
@@ -685,6 +687,17 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
   const activeSortLabel =
     sortOptions.find((option) => option.id === sortOrder)?.label ?? "Sort";
 
+  const resultsKey = [
+    normalizedQuery,
+    resolvedTrackFilter,
+    resolvedFocusFilters.join(","),
+    resolvedYearFilter,
+    resolvedSourceFilter,
+    repoOnly ? "repo" : "all",
+    sortOrder,
+    visibleDeckCount,
+  ].join("|");
+
   return (
     <div className="flex flex-col gap-6 sm:gap-8 lg:gap-10">
       <section
@@ -986,6 +999,11 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
+              {isResultsUpdating ? (
+                <span className="explorer-updating-pill" role="status" aria-live="polite">
+                  Updating results...
+                </span>
+              ) : null}
               <button type="button" onClick={copyFilteredView} className="btn btn-ghost explorer-reset">
                 {linkCopied ? <Check size={15} /> : <Copy size={15} />}
                 {linkCopied ? "Copied" : "Copy filtered view"}
@@ -1172,31 +1190,58 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
         </div>
       </section>
 
-      {visibleDeckCount === 0 ? (
-        <section className="section-shell overflow-hidden p-6 sm:p-8">
-          <div className="collection-glow collection-glow-amber" aria-hidden />
-          <div className="empty-state">
-            <h3 className="text-lg font-semibold text-[color:var(--text-strong)]">
-              No decks match these filters
-            </h3>
-            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[color:var(--text-base)]">
-              Try broadening your query, changing focus/year/source filters, or resetting to the default view.
-            </p>
-            <button type="button" onClick={resetFilters} className="btn btn-secondary mt-4">
-              Clear search and filters
-            </button>
-          </div>
-        </section>
-      ) : (
-        filteredCollections.map(({ collection, decks }) => (
-          <CollectionSection
-            key={collection.id}
-            collection={{ ...collection, decks }}
-            totalDeckCount={collection.decks.length}
-            highlightTerms={highlightTerms}
-          />
-        ))
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={resultsKey}
+          className="explorer-results-stack"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          aria-busy={isResultsUpdating}
+        >
+          {isResultsUpdating ? (
+            <section className="section-shell overflow-hidden p-5 sm:p-7">
+              <div className="collection-glow collection-glow-cyan" aria-hidden />
+              <div className="explorer-skeleton-stack" aria-hidden>
+                <div className="explorer-skeleton skeleton-title" />
+                <div className="explorer-skeleton skeleton-line" />
+                <div className="explorer-skeleton skeleton-line short" />
+                <div className="explorer-skeleton-grid">
+                  <div className="explorer-skeleton skeleton-card" />
+                  <div className="explorer-skeleton skeleton-card" />
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {visibleDeckCount === 0 ? (
+            <section className="section-shell overflow-hidden p-6 sm:p-8">
+              <div className="collection-glow collection-glow-amber" aria-hidden />
+              <div className="empty-state">
+                <h3 className="text-lg font-semibold text-[color:var(--text-strong)]">
+                  No decks match these filters
+                </h3>
+                <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[color:var(--text-base)]">
+                  Try broadening your query, changing focus/year/source filters, or resetting to the default view.
+                </p>
+                <button type="button" onClick={resetFilters} className="btn btn-secondary mt-4">
+                  Clear search and filters
+                </button>
+              </div>
+            </section>
+          ) : (
+            filteredCollections.map(({ collection, decks }) => (
+              <CollectionSection
+                key={collection.id}
+                collection={{ ...collection, decks }}
+                totalDeckCount={collection.decks.length}
+                highlightTerms={highlightTerms}
+              />
+            ))
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
