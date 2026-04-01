@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -639,3 +639,4 @@ a {
     scroll-behavior: auto !important;
   }
 }
+

@@ -1,171 +1,102 @@
-"use client";
+﻿"use client";
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import type { DeckCollection } from "@/lib/types";
 import { DeckCard } from "@/components/deck-card";
-import { Trophy, BookOpen, Sparkles, Clock } from "lucide-react";
+import { BookOpen, Clock3, Sparkles, Trophy } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
-    Trophy: <Trophy size={16} />,
-    BookOpen: <BookOpen size={16} />,
-    Sparkles: <Sparkles size={16} />,
+  Trophy: <Trophy size={15} />,
+  BookOpen: <BookOpen size={15} />,
+  Sparkles: <Sparkles size={15} />,
 };
 
 const sectionVariants = {
-    hidden: {},
-    visible: {
-        transition: { staggerChildren: 0.15, delayChildren: 0.1 },
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.04,
     },
+  },
 };
 
 const fadeIn = {
-    hidden: { opacity: 0, y: 24 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
-    },
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.48, ease: [0.22, 1, 0.36, 1] as const },
+  },
 };
 
-function getAccentStyles(accent: string) {
-    switch (accent) {
-        case "cyan":
-            return {
-                badgeBg: "rgba(6, 182, 212, 0.1)",
-                badgeBorder: "rgba(6, 182, 212, 0.2)",
-                badgeColor: "var(--accent-cyan)",
-                glow: "radial-gradient(ellipse 60% 40% at 20% 40%, rgba(6, 182, 212, 0.06) 0%, transparent 70%)",
-            };
-        case "emerald":
-            return {
-                badgeBg: "rgba(16, 185, 129, 0.1)",
-                badgeBorder: "rgba(16, 185, 129, 0.2)",
-                badgeColor: "var(--accent-emerald)",
-                glow: "radial-gradient(ellipse 60% 40% at 80% 40%, rgba(16, 185, 129, 0.06) 0%, transparent 70%)",
-            };
-        default:
-            return {
-                badgeBg: "rgba(139, 92, 246, 0.1)",
-                badgeBorder: "rgba(139, 92, 246, 0.2)",
-                badgeColor: "var(--accent-violet)",
-                glow: "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(139, 92, 246, 0.06) 0%, transparent 70%)",
-            };
-    }
-}
+const accentMap: Record<string, { chip: string; glow: string }> = {
+  cyan: { chip: "chip chip-cyan", glow: "collection-glow collection-glow-cyan" },
+  emerald: {
+    chip: "chip chip-emerald",
+    glow: "collection-glow collection-glow-emerald",
+  },
+  violet: { chip: "chip chip-amber", glow: "collection-glow collection-glow-amber" },
+};
 
 interface CollectionSectionProps {
-    collection: DeckCollection;
+  collection: DeckCollection;
 }
 
 export function CollectionSection({ collection }: CollectionSectionProps) {
-    const ref = useRef<HTMLElement>(null);
-    const isInView = useInView(ref, { once: true, margin: "-80px" });
-    const styles = getAccentStyles(collection.accent);
+  const ref = useRef<HTMLElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const accent = accentMap[collection.accent] ?? accentMap.cyan;
 
-    return (
-        <motion.section
-            ref={ref}
-            className="relative overflow-hidden rounded-3xl border p-6 sm:p-8 lg:p-10"
-            style={{
-                background: "var(--surface-base)",
-                borderColor: "var(--border-color)",
-                backdropFilter: "blur(24px) saturate(1.4)",
-                WebkitBackdropFilter: "blur(24px) saturate(1.4)",
-                boxShadow: "var(--shadow-section)",
-            }}
-            variants={sectionVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-        >
-            {/* Background Glow */}
-            <div
-                className="pointer-events-none absolute inset-0 -z-10"
-                style={{ background: styles.glow }}
-                aria-hidden
-            />
+  return (
+    <motion.section
+      ref={ref}
+      className="section-shell overflow-hidden p-5 sm:p-7 lg:p-8"
+      variants={sectionVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
+      <div className={accent.glow} aria-hidden />
 
-            {/* Header */}
-            <motion.div variants={fadeIn} className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <span
-                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.06em]"
-                        style={{
-                            background: styles.badgeBg,
-                            border: `1px solid ${styles.badgeBorder}`,
-                            color: styles.badgeColor,
-                        }}
-                    >
-                        {iconMap[collection.iconName]}
-                        {collection.label}
-                    </span>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <h2
-                        className="text-2xl font-bold sm:text-3xl"
-                        style={{ color: "var(--text-primary)" }}
-                    >
-                        {collection.title}
-                    </h2>
-                    <p
-                        className="max-w-2xl text-sm leading-relaxed sm:text-base"
-                        style={{ color: "var(--text-secondary)" }}
-                    >
-                        {collection.description}
-                    </p>
-                </div>
-            </motion.div>
+      <motion.div variants={fadeIn} className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-3">
+          <span className={accent.chip}>
+            {iconMap[collection.iconName]}
+            {collection.label}
+          </span>
+          <h2 className="text-2xl font-extrabold tracking-[-0.02em] text-[color:var(--text-strong)] sm:text-[1.95rem]">
+            {collection.title}
+          </h2>
+          <p className="max-w-3xl text-sm leading-7 text-[color:var(--text-base)] sm:text-[0.95rem]">
+            {collection.description}
+          </p>
+        </div>
 
-            {/* Decks Grid */}
-            {collection.decks.length > 0 ? (
-                <motion.div
-                    className="mt-8 grid gap-5 sm:mt-10 md:grid-cols-2"
-                    variants={sectionVariants}
-                >
-                    {collection.decks.map((deck, index) => (
-                        <DeckCard
-                            key={deck.id}
-                            deck={deck}
-                            accent={collection.accent}
-                            index={index}
-                        />
-                    ))}
-                </motion.div>
-            ) : (
-                <motion.div
-                    variants={fadeIn}
-                    className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-dashed p-10 text-center sm:mt-10"
-                    style={{
-                        borderColor: "var(--border-color)",
-                        background: "var(--surface-muted)",
-                    }}
-                >
-                    <div
-                        className="flex h-12 w-12 items-center justify-center rounded-xl"
-                        style={{ background: "var(--badge-bg)" }}
-                    >
-                        <Clock
-                            size={22}
-                            style={{ color: "var(--text-muted)" }}
-                        />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <h3
-                            className="text-lg font-bold"
-                            style={{ color: "var(--text-primary)" }}
-                        >
-                            Curating flagship decks
-                        </h3>
-                        <p
-                            className="max-w-md text-sm"
-                            style={{ color: "var(--text-secondary)" }}
-                        >
-                            Startup pitch decks, proof-of-concept walkthroughs, and client
-                            innovation reviews will be added here shortly.
-                        </p>
-                    </div>
-                </motion.div>
-            )}
-        </motion.section>
-    );
+        <div className="min-w-[8.2rem] rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-2)] px-3 py-2 text-right">
+          <p className="text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--text-muted)]">Deck count</p>
+          <p className="mt-1 text-2xl font-extrabold text-[color:var(--text-strong)]">{collection.decks.length}</p>
+        </div>
+      </motion.div>
+
+      {collection.decks.length > 0 ? (
+        <motion.div variants={sectionVariants} className="deck-grid mt-6 sm:mt-7">
+          {collection.decks.map((deck, index) => (
+            <DeckCard key={deck.id} deck={deck} accent={collection.accent} index={index} />
+          ))}
+        </motion.div>
+      ) : (
+        <motion.div variants={fadeIn} className="empty-state mt-6 sm:mt-8">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-1)] text-[color:var(--text-muted)]">
+            <Clock3 size={19} />
+          </div>
+          <h3 className="text-lg font-semibold text-[color:var(--text-strong)]">Flagship decks in progress</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[color:var(--text-base)]">
+            This collection is reserved for startup and client-facing case-study decks. New entries will be published soon.
+          </p>
+        </motion.div>
+      )}
+    </motion.section>
+  );
 }
+
