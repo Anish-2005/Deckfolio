@@ -1,17 +1,15 @@
-﻿"use client";
+﻿
+"use client";
 
 import {
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import {
-  Search,
-  SlidersHorizontal,
-  X,
-} from "lucide-react";
+import { Check, Copy, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CollectionSection } from "@/components/collection-section";
 import type { Deck, DeckCollection } from "@/lib/types";
@@ -26,39 +24,161 @@ type FilteredCollection = {
 };
 
 type SortOrder = "newest" | "oldest" | "az" | "relevance";
+type SourceFilter = "all" | "with-repo" | "deck-only";
 
-const sortOptions: Array<{
-  id: SortOrder;
-  label: string;
-}> = [
+type PersistedExplorerState = {
+  q: string;
+  track: string;
+  focus: string[];
+  year: string;
+  source: SourceFilter;
+  repoOnly: boolean;
+  sort: SortOrder;
+};
+
+type IndexedDeck = {
+  deck: Deck;
+  searchBlob: string;
+  tokens: string[];
+  titleLower: string;
+  summaryLower: string;
+  focusLower: string;
+  tagLower: string;
+  badgeLower: string;
+  metaBlobLower: string;
+};
+
+const STORAGE_KEY = "deckfolio.explorer.state.v1";
+const QUERY_KEYS = ["q", "track", "focus", "year", "source", "repo", "sort"];
+
+const sortOptions: Array<{ id: SortOrder; label: string }> = [
   { id: "newest", label: "Newest first" },
   { id: "oldest", label: "Oldest first" },
   { id: "az", label: "A to Z" },
   { id: "relevance", label: "Most relevant" },
 ];
 
-function computeQueryRelevance(deck: Deck, query: string) {
-  const lowered = query.toLowerCase();
+const sourceOptions: Array<{ id: SourceFilter; label: string }> = [
+  { id: "all", label: "All Sources" },
+  { id: "with-repo", label: "With Repository" },
+  { id: "deck-only", label: "Deck Only" },
+];
+
+function parseFocusParam(rawFocus: string | null): string[] {
+  if (!rawFocus) {
+    return [];
+  }
+
+  return rawFocus
+    .split(",")
+    .map((item) => decodeURIComponent(item).trim())
+    .filter(Boolean);
+}
+
+function parseSortOrder(rawSort: string | null): SortOrder {
+  if (
+    rawSort === "newest" ||
+    rawSort === "oldest" ||
+    rawSort === "az" ||
+    rawSort === "relevance"
+  ) {
+    return rawSort;
+  }
+
+  return "newest";
+}
+
+function parseSourceFilter(rawSource: string | null): SourceFilter {
+  if (rawSource === "with-repo" || rawSource === "deck-only") {
+    return rawSource;
+  }
+
+  return "all";
+}
+
+function tokenize(input: string): string[] {
+  const tokens = input.toLowerCase().match(/[a-z0-9]+/g) ?? [];
+  return Array.from(new Set(tokens.filter((token) => token.length > 1)));
+}
+
+function boundedLevenshtein(source: string, target: string, maxDistance: number): number {
+  if (Math.abs(source.length - target.length) > maxDistance) {
+    return maxDistance + 1;
+  }
+
+  const prev = new Array(target.length + 1);
+  const curr = new Array(target.length + 1);
+
+  for (let j = 0; j <= target.length; j += 1) {
+    prev[j] = j;
+  }
+
+  for (let i = 1; i <= source.length; i += 1) {
+    curr[0] = i;
+    let minInRow = curr[0];
+
+    for (let j = 1; j <= target.length; j += 1) {
+      const cost = source[i - 1] === target[j - 1] ? 0 : 1;
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+
+      if (curr[j] < minInRow) {
+        minInRow = curr[j];
+      }
+    }
+
+    if (minInRow > maxDistance) {
+      return maxDistance + 1;
+    }
+
+    for (let j = 0; j <= target.length; j += 1) {
+      prev[j] = curr[j];
+    }
+  }
+
+  return prev[target.length];
+}
+
+function tokenMatchesWithFuzzy(queryToken: string, targetTokens: string[]): boolean {
+  if (queryToken.length < 3) {
+    return targetTokens.some((token) => token.startsWith(queryToken));
+  }
+
+  const maxDistance = queryToken.length >= 8 ? 2 : 1;
+
+  return targetTokens.some((token) => {
+    if (token.includes(queryToken) || queryToken.includes(token)) {
+      return true;
+    }
+
+    return boundedLevenshtein(queryToken, token, maxDistance) <= maxDistance;
+  });
+}
+
+function computeRelevanceScore(indexedDeck: IndexedDeck, queryTokens: string[]): number {
+  if (queryTokens.length === 0) {
+    return 0;
+  }
+
   let score = 0;
 
-  if (deck.title.toLowerCase().includes(lowered)) {
-    score += 6;
-  }
+  for (const token of queryTokens) {
+    if (indexedDeck.titleLower.includes(token)) {
+      score += 8;
+    }
 
-  if (deck.summary.toLowerCase().includes(lowered)) {
-    score += 4;
-  }
+    if (indexedDeck.summaryLower.includes(token)) {
+      score += 5;
+    }
 
-  if (deck.focusArea.toLowerCase().includes(lowered)) {
-    score += 3;
-  }
+    if (indexedDeck.focusLower.includes(token)) {
+      score += 4;
+    }
 
-  if (deck.tag.toLowerCase().includes(lowered) || deck.badge.toLowerCase().includes(lowered)) {
-    score += 2;
-  }
+    if (indexedDeck.tagLower.includes(token) || indexedDeck.badgeLower.includes(token)) {
+      score += 2;
+    }
 
-  for (const metaItem of deck.meta) {
-    if (metaItem.label.toLowerCase().includes(lowered) || metaItem.value.toLowerCase().includes(lowered)) {
+    if (indexedDeck.metaBlobLower.includes(token)) {
       score += 1;
     }
   }
@@ -71,24 +191,107 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [searchQuery, setSearchQuery] = useState(() => searchParams.get("q") ?? "");
-  const [trackFilter, setTrackFilter] = useState(() => searchParams.get("track") ?? "all");
-  const [focusFilter, setFocusFilter] = useState(() => searchParams.get("focus") ?? "all");
-  const [sortOrder, setSortOrder] = useState<SortOrder>(() => {
-    const fromParams = searchParams.get("sort");
+  const hasUrlState = QUERY_KEYS.some((key) => searchParams.get(key) !== null);
 
-    if (fromParams === "newest" || fromParams === "oldest" || fromParams === "az" || fromParams === "relevance") {
-      return fromParams;
+  const persistedState = useMemo((): PersistedExplorerState | null => {
+    if (hasUrlState || typeof window === "undefined") {
+      return null;
     }
 
-    return "newest";
-  });
+    try {
+      const rawState = window.localStorage.getItem(STORAGE_KEY);
+      if (!rawState) {
+        return null;
+      }
 
+      const parsedState = JSON.parse(rawState) as Partial<PersistedExplorerState>;
+
+      return {
+        q: parsedState.q ?? "",
+        track: parsedState.track ?? "all",
+        focus: Array.isArray(parsedState.focus)
+          ? parsedState.focus.filter((item): item is string => typeof item === "string")
+          : [],
+        year: parsedState.year ?? "all",
+        source: parseSourceFilter(parsedState.source ?? null),
+        repoOnly: Boolean(parsedState.repoOnly),
+        sort: parseSortOrder(parsedState.sort ?? null),
+      };
+    } catch {
+      return null;
+    }
+  }, [hasUrlState]);
+
+  const [searchQuery, setSearchQuery] = useState(
+    () => searchParams.get("q") ?? persistedState?.q ?? "",
+  );
+  const [trackFilter, setTrackFilter] = useState(
+    () => searchParams.get("track") ?? persistedState?.track ?? "all",
+  );
+  const [focusFilters, setFocusFilters] = useState<string[]>(() => {
+    const fromQuery = parseFocusParam(searchParams.get("focus"));
+    if (fromQuery.length > 0) {
+      return fromQuery;
+    }
+
+    return persistedState?.focus ?? [];
+  });
+  const [yearFilter, setYearFilter] = useState(
+    () => searchParams.get("year") ?? persistedState?.year ?? "all",
+  );
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>(
+    () => parseSourceFilter(searchParams.get("source") ?? persistedState?.source ?? null),
+  );
+  const [repoOnly, setRepoOnly] = useState(
+    () => searchParams.get("repo") === "1" || Boolean(persistedState?.repoOnly),
+  );
+  const [sortOrder, setSortOrder] = useState<SortOrder>(
+    () => parseSortOrder(searchParams.get("sort") ?? persistedState?.sort ?? null),
+  );
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const copyTimeoutRef = useRef<number | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const validTrackIds = useMemo(
-    () => new Set(["all", ...collections.map((collection) => collection.id)]),
+
+  const deferredSearch = useDeferredValue(searchQuery);
+  const normalizedQuery = deferredSearch.trim().toLowerCase();
+  const searchTokens = useMemo(() => tokenize(normalizedQuery), [normalizedQuery]);
+
+  const indexedCollections = useMemo(
+    () =>
+      collections.map((collection) => ({
+        collection,
+        indexedDecks: collection.decks.map((deck) => {
+          const metaBlob = deck.meta.map((item) => `${item.label} ${item.value}`).join(" ");
+          const searchBlob = [
+            collection.label,
+            collection.title,
+            deck.title,
+            deck.summary,
+            deck.tag,
+            deck.badge,
+            deck.focusArea,
+            String(deck.year),
+            metaBlob,
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return {
+            deck,
+            searchBlob,
+            tokens: tokenize(searchBlob),
+            titleLower: deck.title.toLowerCase(),
+            summaryLower: deck.summary.toLowerCase(),
+            focusLower: deck.focusArea.toLowerCase(),
+            tagLower: deck.tag.toLowerCase(),
+            badgeLower: deck.badge.toLowerCase(),
+            metaBlobLower: metaBlob.toLowerCase(),
+          } satisfies IndexedDeck;
+        }),
+      })),
     [collections],
   );
 
@@ -118,12 +321,38 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
       }
     }
 
-    return ["all", ...Array.from(uniqueFocusAreas)];
+    return Array.from(uniqueFocusAreas);
   }, [collections]);
 
+  const yearOptions = useMemo(() => {
+    const uniqueYears = new Set<number>();
+
+    for (const collection of collections) {
+      for (const deck of collection.decks) {
+        uniqueYears.add(deck.year);
+      }
+    }
+
+    return Array.from(uniqueYears)
+      .sort((first, second) => second - first)
+      .map((year) => String(year));
+  }, [collections]);
+
+  const validTrackIds = useMemo(
+    () => new Set(["all", ...collections.map((collection) => collection.id)]),
+    [collections],
+  );
   const validFocusIds = useMemo(() => new Set(focusOptions), [focusOptions]);
+  const validYearIds = useMemo(() => new Set(["all", ...yearOptions]), [yearOptions]);
+
   const resolvedTrackFilter = validTrackIds.has(trackFilter) ? trackFilter : "all";
-  const resolvedFocusFilter = validFocusIds.has(focusFilter) ? focusFilter : "all";
+  const resolvedFocusFilters = useMemo(
+    () =>
+      Array.from(new Set(focusFilters)).filter((focusValue) => validFocusIds.has(focusValue)),
+    [focusFilters, validFocusIds],
+  );
+  const resolvedYearFilter = validYearIds.has(yearFilter) ? yearFilter : "all";
+  const resolvedSourceFilter = parseSourceFilter(sourceFilter);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -136,8 +365,20 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
       params.set("track", resolvedTrackFilter);
     }
 
-    if (resolvedFocusFilter !== "all") {
-      params.set("focus", resolvedFocusFilter);
+    if (resolvedFocusFilters.length > 0) {
+      params.set("focus", resolvedFocusFilters.join(","));
+    }
+
+    if (resolvedYearFilter !== "all") {
+      params.set("year", resolvedYearFilter);
+    }
+
+    if (resolvedSourceFilter !== "all") {
+      params.set("source", resolvedSourceFilter);
+    }
+
+    if (repoOnly) {
+      params.set("repo", "1");
     }
 
     if (sortOrder !== "newest") {
@@ -145,14 +386,48 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     }
 
     const queryString = params.toString();
-    const nextUrl = queryString ? `${pathname}?${queryString}` : pathname;
+    const currentQueryString = searchParams.toString();
+    if (queryString === currentQueryString) {
+      return;
+    }
 
+    const nextUrl = queryString ? `${pathname}?${queryString}` : pathname;
     router.replace(nextUrl, { scroll: false });
   }, [
     pathname,
-    resolvedFocusFilter,
+    repoOnly,
+    resolvedFocusFilters,
+    resolvedSourceFilter,
     resolvedTrackFilter,
+    resolvedYearFilter,
     router,
+    searchParams,
+    searchQuery,
+    sortOrder,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const stateForPersistence: PersistedExplorerState = {
+      q: searchQuery.trim(),
+      track: resolvedTrackFilter,
+      focus: resolvedFocusFilters,
+      year: resolvedYearFilter,
+      source: resolvedSourceFilter,
+      repoOnly,
+      sort: sortOrder,
+    };
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateForPersistence));
+  }, [
+    repoOnly,
+    resolvedFocusFilters,
+    resolvedSourceFilter,
+    resolvedTrackFilter,
+    resolvedYearFilter,
     searchQuery,
     sortOrder,
   ]);
@@ -171,7 +446,11 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
         searchInputRef.current?.select();
       }
 
-      if (event.key === "Escape" && activeElement === searchInputRef.current && searchQuery) {
+      if (
+        event.key === "Escape" &&
+        activeElement === searchInputRef.current &&
+        searchQuery
+      ) {
         event.preventDefault();
         setSearchQuery("");
       }
@@ -184,38 +463,64 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     };
   }, [searchQuery]);
 
+  useEffect(() => {
+    if (!isMobileFilterOpen || typeof document === "undefined") {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileFilterOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const hasActiveFilters =
     normalizedQuery.length > 0 ||
     resolvedTrackFilter !== "all" ||
-    resolvedFocusFilter !== "all" ||
+    resolvedFocusFilters.length > 0 ||
+    resolvedYearFilter !== "all" ||
+    resolvedSourceFilter !== "all" ||
+    repoOnly ||
     sortOrder !== "newest";
 
+  const activeFilterCount =
+    (normalizedQuery ? 1 : 0) +
+    (resolvedTrackFilter !== "all" ? 1 : 0) +
+    (resolvedFocusFilters.length > 0 ? 1 : 0) +
+    (resolvedYearFilter !== "all" ? 1 : 0) +
+    (resolvedSourceFilter !== "all" ? 1 : 0) +
+    (repoOnly ? 1 : 0) +
+    (sortOrder !== "newest" ? 1 : 0);
+
   const filteredCollections = useMemo<FilteredCollection[]>(() => {
-    const matchDeckAgainstQuery = (deck: Deck, collection: DeckCollection) => {
-      if (!normalizedQuery) {
+    const queryMatches = (indexedDeck: IndexedDeck) => {
+      if (searchTokens.length === 0) {
         return true;
       }
 
-      const searchableFields = [
-        collection.label,
-        collection.title,
-        deck.title,
-        deck.summary,
-        deck.tag,
-        deck.badge,
-        deck.focusArea,
-        String(deck.year),
-        ...deck.meta.map((item) => item.label),
-        ...deck.meta.map((item) => item.value),
-      ];
+      return searchTokens.every((token) => {
+        if (indexedDeck.searchBlob.includes(token)) {
+          return true;
+        }
 
-      return searchableFields.join(" ").toLowerCase().includes(normalizedQuery);
+        return tokenMatchesWithFuzzy(token, indexedDeck.tokens);
+      });
     };
 
-    const compareDecks = (first: Deck, second: Deck) => {
-      if (sortOrder === "relevance" && normalizedQuery) {
-        const firstScore = computeQueryRelevance(first, normalizedQuery);
-        const secondScore = computeQueryRelevance(second, normalizedQuery);
+    const compareDecks = (first: IndexedDeck, second: IndexedDeck) => {
+      if (sortOrder === "relevance" && searchTokens.length > 0) {
+        const firstScore = computeRelevanceScore(first, searchTokens);
+        const secondScore = computeRelevanceScore(second, searchTokens);
 
         if (secondScore !== firstScore) {
           return secondScore - firstScore;
@@ -223,36 +528,52 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
       }
 
       if (sortOrder === "oldest") {
-        if (first.year !== second.year) {
-          return first.year - second.year;
+        if (first.deck.year !== second.deck.year) {
+          return first.deck.year - second.deck.year;
         }
       } else if (sortOrder === "az") {
-        const alphabetical = first.title.localeCompare(second.title);
-
+        const alphabetical = first.deck.title.localeCompare(second.deck.title);
         if (alphabetical !== 0) {
           return alphabetical;
         }
-      } else {
-        if (second.year !== first.year) {
-          return second.year - first.year;
-        }
+      } else if (second.deck.year !== first.deck.year) {
+        return second.deck.year - first.deck.year;
       }
 
-      return first.title.localeCompare(second.title);
+      return first.deck.title.localeCompare(second.deck.title);
     };
 
-    return collections
-      .map((collection) => {
-        const decks = collection.decks
+    return indexedCollections
+      .map(({ collection, indexedDecks }) => {
+        const decks = indexedDecks
           .filter(
             () => resolvedTrackFilter === "all" || collection.id === resolvedTrackFilter,
           )
           .filter(
-            (deck) =>
-              resolvedFocusFilter === "all" || deck.focusArea === resolvedFocusFilter,
+            (indexedDeck) =>
+              resolvedFocusFilters.length === 0 ||
+              resolvedFocusFilters.includes(indexedDeck.deck.focusArea),
           )
-          .filter((deck) => matchDeckAgainstQuery(deck, collection))
-          .sort(compareDecks);
+          .filter(
+            (indexedDeck) =>
+              resolvedYearFilter === "all" ||
+              indexedDeck.deck.year === Number(resolvedYearFilter),
+          )
+          .filter((indexedDeck) => {
+            if (resolvedSourceFilter === "with-repo") {
+              return Boolean(indexedDeck.deck.secondaryLink);
+            }
+
+            if (resolvedSourceFilter === "deck-only") {
+              return !indexedDeck.deck.secondaryLink;
+            }
+
+            return true;
+          })
+          .filter((indexedDeck) => !repoOnly || Boolean(indexedDeck.deck.secondaryLink))
+          .filter(queryMatches)
+          .sort(compareDecks)
+          .map((indexedDeck) => indexedDeck.deck);
 
         return { collection, decks };
       })
@@ -261,11 +582,14 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
           decks.length > 0 || (!hasActiveFilters && collection.comingSoon),
       );
   }, [
-    collections,
-    resolvedFocusFilter,
-    resolvedTrackFilter,
     hasActiveFilters,
-    normalizedQuery,
+    indexedCollections,
+    repoOnly,
+    resolvedFocusFilters,
+    resolvedSourceFilter,
+    resolvedTrackFilter,
+    resolvedYearFilter,
+    searchTokens,
     sortOrder,
   ]);
 
@@ -274,25 +598,90 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     [filteredCollections],
   );
 
+  const highlightTerms = useMemo(() => searchTokens.slice(0, 6), [searchTokens]);
+
+  const firstVisibleDeck = useMemo(
+    () => filteredCollections.find((collectionItem) => collectionItem.decks.length > 0)?.decks[0],
+    [filteredCollections],
+  );
+
   const resetFilters = useCallback(() => {
     setSearchQuery("");
     setTrackFilter("all");
-    setFocusFilter("all");
+    setFocusFilters([]);
+    setYearFilter("all");
+    setSourceFilter("all");
+    setRepoOnly(false);
     setSortOrder("newest");
   }, []);
 
-  const removeTrackFilter = useCallback(() => setTrackFilter("all"), []);
-  const removeFocusFilter = useCallback(() => setFocusFilter("all"), []);
-  const removeSortFilter = useCallback(() => setSortOrder("newest"), []);
+  const toggleFocusFilter = useCallback((focusArea: string) => {
+    setFocusFilters((previousFilters) => {
+      if (previousFilters.includes(focusArea)) {
+        return previousFilters.filter((item) => item !== focusArea);
+      }
+
+      return [...previousFilters, focusArea];
+    });
+  }, []);
 
   const jumpToResults = useCallback(() => {
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  const activeTrackLabel =
-    trackOptions.find((option) => option.id === resolvedTrackFilter)?.label ??
-    "Selected Track";
+  const copyFilteredView = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setLinkCopied(true);
 
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setLinkCopied(false);
+      }, 1800);
+    } catch {
+      setLinkCopied(false);
+    }
+  }, []);
+
+  const applyPreset = useCallback((preset: "sih-2025" | "internal-repo" | "legaltech") => {
+    if (preset === "sih-2025") {
+      setTrackFilter("sih");
+      setYearFilter("2025");
+      setFocusFilters([]);
+      setSourceFilter("all");
+      setRepoOnly(false);
+      setSortOrder("newest");
+      setSearchQuery("");
+    }
+
+    if (preset === "internal-repo") {
+      setTrackFilter("internal");
+      setYearFilter("all");
+      setFocusFilters([]);
+      setSourceFilter("with-repo");
+      setRepoOnly(true);
+      setSortOrder("newest");
+      setSearchQuery("");
+    }
+
+    if (preset === "legaltech") {
+      setTrackFilter("all");
+      setYearFilter("all");
+      setFocusFilters(["LegalTech"]);
+      setSourceFilter("all");
+      setRepoOnly(false);
+      setSortOrder("relevance");
+      setSearchQuery("legal assistant");
+    }
+
+    setIsMobileFilterOpen(false);
+  }, []);
+
+  const activeTrackLabel =
+    trackOptions.find((option) => option.id === resolvedTrackFilter)?.label ?? "Selected Track";
   const activeSortLabel =
     sortOptions.find((option) => option.id === sortOrder)?.label ?? "Sort";
 
@@ -314,7 +703,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               Find the right deck in seconds
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-[color:var(--text-base)] sm:text-[0.95rem]">
-              Search across titles, summaries, metadata, and technology tags, then narrow results by track, focus area, and sort order.
+              Search with typo tolerance, filter by track/focus/year/source, and share your filtered review view.
             </p>
           </div>
 
@@ -325,7 +714,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search decks by title, problem space, stack, or year..."
+              placeholder="Search decks by title, problem, stack, focus area, or year..."
               className="explorer-search-input"
               aria-label="Search decks"
             />
@@ -346,6 +735,22 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
             ) : null}
           </div>
 
+          <div className="explorer-preset-row" role="group" aria-label="Quick presets">
+            <button type="button" className="explorer-filter-pill" onClick={() => applyPreset("sih-2025")}>
+              SIH 2025
+            </button>
+            <button
+              type="button"
+              className="explorer-filter-pill"
+              onClick={() => applyPreset("internal-repo")}
+            >
+              Internal + Repo
+            </button>
+            <button type="button" className="explorer-filter-pill" onClick={() => applyPreset("legaltech")}>
+              LegalTech Spotlight
+            </button>
+          </div>
+
           <div className="explorer-toolbar-row">
             <div className="explorer-sort-wrap">
               <label htmlFor="deck-sort" className="explorer-filter-label">
@@ -356,6 +761,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                 value={sortOrder}
                 onChange={(event) => setSortOrder(event.target.value as SortOrder)}
                 className="explorer-sort-select"
+                aria-label="Sort deck results"
               >
                 {sortOptions.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -365,52 +771,126 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               </select>
             </div>
 
-            <button type="button" className="btn btn-secondary" onClick={jumpToResults}>
-              Jump to Results
-            </button>
-          </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary sm:hidden"
+                onClick={() => setIsMobileFilterOpen(true)}
+                aria-label="Open filters"
+              >
+                Filters
+                {activeFilterCount > 0 ? (
+                  <span className="explorer-mobile-count">{activeFilterCount}</span>
+                ) : null}
+              </button>
 
-          <div className="explorer-filter-group">
-            <p className="explorer-filter-label">Track</p>
-            <div className="explorer-filter-row explorer-filter-row-scroll">
-              {trackOptions.map((option) => {
-                const isResolvedActive = resolvedTrackFilter === option.id;
-                const isDisabled = option.id !== "all" && option.count === 0;
-
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setTrackFilter(option.id)}
-                    disabled={isDisabled}
-                    className={`explorer-filter-pill ${isResolvedActive ? "is-active" : ""}`}
-                  >
-                    <span>{option.label}</span>
-                    <span className="explorer-pill-count">{option.count}</span>
-                  </button>
-                );
-              })}
+              <button type="button" className="btn btn-secondary" onClick={jumpToResults}>
+                Jump to Results
+              </button>
             </div>
           </div>
 
-          <div className="explorer-filter-group">
-            <p className="explorer-filter-label">Focus Area</p>
-            <div className="explorer-filter-row explorer-filter-row-scroll">
-              {focusOptions.map((option) => {
-                const isActive = resolvedFocusFilter === option;
-                const optionLabel = option === "all" ? "All Areas" : option;
+          <div className="hidden gap-4 sm:grid">
+            <div className="explorer-filter-group">
+              <p className="explorer-filter-label">Track</p>
+              <div className="explorer-filter-row explorer-filter-row-wrap">
+                {trackOptions.map((option) => {
+                  const isActive = resolvedTrackFilter === option.id;
+                  const isDisabled = option.id !== "all" && option.count === 0;
 
-                return (
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setTrackFilter(option.id)}
+                      disabled={isDisabled}
+                      aria-pressed={isActive}
+                      className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                    >
+                      <span>{option.label}</span>
+                      <span className="explorer-pill-count">{option.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="explorer-filter-group">
+              <p className="explorer-filter-label">Focus Areas</p>
+              <div className="explorer-filter-row explorer-filter-row-wrap">
+                {focusOptions.map((focusArea) => {
+                  const isActive = resolvedFocusFilters.includes(focusArea);
+
+                  return (
+                    <button
+                      key={focusArea}
+                      type="button"
+                      onClick={() => toggleFocusFilter(focusArea)}
+                      aria-pressed={isActive}
+                      className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                    >
+                      {focusArea}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="explorer-filter-grid">
+              <div className="explorer-filter-group">
+                <p className="explorer-filter-label">Year</p>
+                <div className="explorer-filter-row explorer-filter-row-wrap">
                   <button
-                    key={option}
                     type="button"
-                    onClick={() => setFocusFilter(option)}
-                    className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                    onClick={() => setYearFilter("all")}
+                    aria-pressed={resolvedYearFilter === "all"}
+                    className={`explorer-filter-pill ${resolvedYearFilter === "all" ? "is-active" : ""}`}
                   >
-                    {optionLabel}
+                    All Years
                   </button>
-                );
-              })}
+                  {yearOptions.map((yearOption) => (
+                    <button
+                      key={yearOption}
+                      type="button"
+                      onClick={() => setYearFilter(yearOption)}
+                      aria-pressed={resolvedYearFilter === yearOption}
+                      className={`explorer-filter-pill ${resolvedYearFilter === yearOption ? "is-active" : ""}`}
+                    >
+                      {yearOption}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="explorer-filter-group">
+                <p className="explorer-filter-label">Sources</p>
+                <div className="explorer-filter-row explorer-filter-row-wrap">
+                  {sourceOptions.map((option) => {
+                    const isActive = resolvedSourceFilter === option.id;
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setSourceFilter(option.id)}
+                        aria-pressed={isActive}
+                        className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => setRepoOnly((previousState) => !previousState)}
+                    aria-pressed={repoOnly}
+                    className={`explorer-filter-pill explorer-toggle-pill ${repoOnly ? "is-active" : ""}`}
+                  >
+                    Has Repo
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -419,28 +899,78 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               <p className="explorer-filter-label">Active Filters</p>
               <div className="explorer-filter-row explorer-filter-row-wrap">
                 {normalizedQuery ? (
-                  <button type="button" className="explorer-filter-pill is-active" onClick={() => setSearchQuery("")}>
+                  <button
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => setSearchQuery("")}
+                  >
                     Search: &quot;{searchQuery.trim()}&quot;
                     <X size={12} />
                   </button>
                 ) : null}
 
                 {resolvedTrackFilter !== "all" ? (
-                  <button type="button" className="explorer-filter-pill is-active" onClick={removeTrackFilter}>
+                  <button
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => setTrackFilter("all")}
+                  >
                     Track: {activeTrackLabel}
                     <X size={12} />
                   </button>
                 ) : null}
 
-                {resolvedFocusFilter !== "all" ? (
-                  <button type="button" className="explorer-filter-pill is-active" onClick={removeFocusFilter}>
-                    Focus: {resolvedFocusFilter}
+                {resolvedFocusFilters.map((focusValue) => (
+                  <button
+                    key={focusValue}
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => toggleFocusFilter(focusValue)}
+                  >
+                    Focus: {focusValue}
+                    <X size={12} />
+                  </button>
+                ))}
+
+                {resolvedYearFilter !== "all" ? (
+                  <button
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => setYearFilter("all")}
+                  >
+                    Year: {resolvedYearFilter}
+                    <X size={12} />
+                  </button>
+                ) : null}
+
+                {resolvedSourceFilter !== "all" ? (
+                  <button
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => setSourceFilter("all")}
+                  >
+                    Source: {sourceOptions.find((option) => option.id === resolvedSourceFilter)?.label}
+                    <X size={12} />
+                  </button>
+                ) : null}
+
+                {repoOnly ? (
+                  <button
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => setRepoOnly(false)}
+                  >
+                    Has Repo
                     <X size={12} />
                   </button>
                 ) : null}
 
                 {sortOrder !== "newest" ? (
-                  <button type="button" className="explorer-filter-pill is-active" onClick={removeSortFilter}>
+                  <button
+                    type="button"
+                    className="explorer-filter-pill is-active"
+                    onClick={() => setSortOrder("newest")}
+                  >
                     Sort: {activeSortLabel}
                     <X size={12} />
                   </button>
@@ -454,20 +984,193 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               Showing <span className="font-bold text-[color:var(--text-strong)]">{visibleDeckCount}</span> of{" "}
               <span className="font-bold text-[color:var(--text-strong)]">{totalDeckCount}</span> decks
             </p>
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="btn btn-ghost explorer-reset"
-              >
-                Reset all
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={copyFilteredView} className="btn btn-ghost explorer-reset">
+                {linkCopied ? <Check size={15} /> : <Copy size={15} />}
+                {linkCopied ? "Copied" : "Copy filtered view"}
               </button>
-            ) : null}
+
+              {hasActiveFilters ? (
+                <button type="button" onClick={resetFilters} className="btn btn-ghost explorer-reset">
+                  Reset all
+                </button>
+              ) : null}
+            </div>
           </div>
+
+          <p className="sr-only" aria-live="polite">
+            Showing {visibleDeckCount} of {totalDeckCount} decks
+          </p>
         </div>
       </section>
 
+      {isMobileFilterOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label="Close filters"
+            className="explorer-sheet-backdrop sm:hidden"
+            onClick={() => setIsMobileFilterOpen(false)}
+          />
+
+          <section className="explorer-sheet sm:hidden" role="dialog" aria-modal="true" aria-label="Deck filters">
+            <div className="explorer-sheet-header">
+              <h3 className="text-base font-semibold text-[color:var(--text-strong)]">Filters</h3>
+              <button
+                type="button"
+                className="explorer-search-clear"
+                onClick={() => setIsMobileFilterOpen(false)}
+                aria-label="Close filter panel"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="explorer-sheet-content">
+              <div className="explorer-filter-group">
+                <p className="explorer-filter-label">Track</p>
+                <div className="explorer-filter-row explorer-filter-row-wrap">
+                  {trackOptions.map((option) => {
+                    const isActive = resolvedTrackFilter === option.id;
+                    const isDisabled = option.id !== "all" && option.count === 0;
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setTrackFilter(option.id)}
+                        disabled={isDisabled}
+                        aria-pressed={isActive}
+                        className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                      >
+                        <span>{option.label}</span>
+                        <span className="explorer-pill-count">{option.count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="explorer-filter-group">
+                <p className="explorer-filter-label">Focus Areas</p>
+                <div className="explorer-filter-row explorer-filter-row-wrap">
+                  {focusOptions.map((focusArea) => {
+                    const isActive = resolvedFocusFilters.includes(focusArea);
+
+                    return (
+                      <button
+                        key={focusArea}
+                        type="button"
+                        onClick={() => toggleFocusFilter(focusArea)}
+                        aria-pressed={isActive}
+                        className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                      >
+                        {focusArea}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="explorer-filter-group">
+                <p className="explorer-filter-label">Year</p>
+                <div className="explorer-filter-row explorer-filter-row-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setYearFilter("all")}
+                    aria-pressed={resolvedYearFilter === "all"}
+                    className={`explorer-filter-pill ${resolvedYearFilter === "all" ? "is-active" : ""}`}
+                  >
+                    All Years
+                  </button>
+                  {yearOptions.map((yearOption) => (
+                    <button
+                      key={yearOption}
+                      type="button"
+                      onClick={() => setYearFilter(yearOption)}
+                      aria-pressed={resolvedYearFilter === yearOption}
+                      className={`explorer-filter-pill ${resolvedYearFilter === yearOption ? "is-active" : ""}`}
+                    >
+                      {yearOption}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="explorer-filter-group">
+                <p className="explorer-filter-label">Sources</p>
+                <div className="explorer-filter-row explorer-filter-row-wrap">
+                  {sourceOptions.map((option) => {
+                    const isActive = resolvedSourceFilter === option.id;
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setSourceFilter(option.id)}
+                        aria-pressed={isActive}
+                        className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => setRepoOnly((previousState) => !previousState)}
+                    aria-pressed={repoOnly}
+                    className={`explorer-filter-pill explorer-toggle-pill ${repoOnly ? "is-active" : ""}`}
+                  >
+                    Has Repo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="explorer-sheet-actions">
+              <button type="button" className="btn btn-ghost" onClick={resetFilters}>
+                Reset
+              </button>
+              <button type="button" className="btn btn-primary" onClick={() => setIsMobileFilterOpen(false)}>
+                Apply Filters
+              </button>
+            </div>
+          </section>
+        </>
+      ) : null}
+
       <div ref={resultsRef} className="explorer-results-anchor" aria-hidden />
+
+      <section className="surface-panel explorer-result-bar p-3 sm:p-4" aria-label="Result actions">
+        <div>
+          <p className="text-sm font-semibold text-[color:var(--text-strong)]">Review Mode</p>
+          <p className="text-xs text-[color:var(--text-muted)]">
+            {visibleDeckCount > 0
+              ? "Open the top match or share this filtered view with collaborators."
+              : "Adjust filters to return matching decks."}
+          </p>
+        </div>
+
+        <div className="explorer-result-actions">
+          {firstVisibleDeck ? (
+            <a
+              href={firstVisibleDeck.primaryLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+            >
+              Open Top Match
+            </a>
+          ) : null}
+
+          <button type="button" className="btn btn-ghost" onClick={copyFilteredView}>
+            {linkCopied ? <Check size={15} /> : <Copy size={15} />}
+            {linkCopied ? "Copied" : "Copy View Link"}
+          </button>
+        </div>
+      </section>
 
       {visibleDeckCount === 0 ? (
         <section className="section-shell overflow-hidden p-6 sm:p-8">
@@ -477,7 +1180,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               No decks match these filters
             </h3>
             <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[color:var(--text-base)]">
-              Try broadening your query, switching sort order, or resetting filters to return to the full deck library.
+              Try broadening your query, changing focus/year/source filters, or resetting to the default view.
             </p>
             <button type="button" onClick={resetFilters} className="btn btn-secondary mt-4">
               Clear search and filters
@@ -490,6 +1193,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
             key={collection.id}
             collection={{ ...collection, decks }}
             totalDeckCount={collection.decks.length}
+            highlightTerms={highlightTerms}
           />
         ))
       )}

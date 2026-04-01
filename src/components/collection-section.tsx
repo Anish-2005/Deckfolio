@@ -43,9 +43,14 @@ const accentMap: Record<string, { chip: string; glow: string }> = {
 interface CollectionSectionProps {
   collection: DeckCollection;
   totalDeckCount?: number;
+  highlightTerms?: string[];
 }
 
-export function CollectionSection({ collection, totalDeckCount }: CollectionSectionProps) {
+export function CollectionSection({
+  collection,
+  totalDeckCount,
+  highlightTerms,
+}: CollectionSectionProps) {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const accent = accentMap[collection.accent] ?? accentMap.cyan;
@@ -90,7 +95,13 @@ export function CollectionSection({ collection, totalDeckCount }: CollectionSect
       {visibleDeckCount > 0 ? (
         <motion.div variants={sectionVariants} className="deck-grid mt-6 sm:mt-7">
           {collection.decks.map((deck, index) => (
-            <DeckCard key={deck.id} deck={deck} accent={collection.accent} index={index} />
+            <DeckCard
+              key={deck.id}
+              deck={deck}
+              accent={collection.accent}
+              index={index}
+              highlightTerms={highlightTerms}
+            />
           ))}
         </motion.div>
       ) : (

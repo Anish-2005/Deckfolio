@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { motion } from "framer-motion";
+import type { ReactNode } from "react";
 import type { Deck } from "@/lib/types";
 import { ExternalLink, FileText } from "lucide-react";
 
@@ -28,9 +29,39 @@ interface DeckCardProps {
   deck: Deck;
   accent: string;
   index: number;
+  highlightTerms?: string[];
 }
 
-export function DeckCard({ deck, accent, index }: DeckCardProps) {
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, terms: string[]): ReactNode {
+  const sanitizedTerms = Array.from(
+    new Set(terms.map((term) => term.trim()).filter((term) => term.length > 1)),
+  ).sort((first, second) => second.length - first.length);
+
+  if (sanitizedTerms.length === 0) {
+    return text;
+  }
+
+  const pattern = new RegExp(`(${sanitizedTerms.map((term) => escapeRegExp(term)).join("|")})`, "gi");
+  const segments = text.split(pattern);
+
+  return segments.map((segment, index) => {
+    if (sanitizedTerms.some((term) => term.toLowerCase() === segment.toLowerCase())) {
+      return (
+        <mark key={`${segment}-${index}`} className="deck-highlight">
+          {segment}
+        </mark>
+      );
+    }
+
+    return segment;
+  });
+}
+
+export function DeckCard({ deck, accent, index, highlightTerms = [] }: DeckCardProps) {
   const accentChipClass = accentChipMap[accent] ?? "chip chip-cyan";
 
   return (
@@ -41,15 +72,15 @@ export function DeckCard({ deck, accent, index }: DeckCardProps) {
       </div>
 
       <div className="space-y-2">
-        <h3 className="deck-card-title">{deck.title}</h3>
-        <p className="deck-card-summary">{deck.summary}</p>
+        <h3 className="deck-card-title">{highlightText(deck.title, highlightTerms)}</h3>
+        <p className="deck-card-summary">{highlightText(deck.summary, highlightTerms)}</p>
       </div>
 
       <ul className="meta-list">
         {deck.meta.map((item) => (
           <li key={item.label} className="meta-item">
             <span className="meta-label">{item.label}</span>
-            <span className="meta-value">{item.value}</span>
+            <span className="meta-value">{highlightText(item.value, highlightTerms)}</span>
           </li>
         ))}
       </ul>
