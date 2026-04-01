@@ -3,10 +3,10 @@
 export const deckCollections: DeckCollection[] = [
   {
     id: "sih",
-    label: "National Finalist Track",
+    label: "National Finalist Portfolio",
     title: "Smart India Hackathon Finalist Decks",
     description:
-      "Jury-facing finalist presentations built for policy, implementation feasibility, and measurable outcomes.",
+      "Finalist presentations prepared for ministry and jury reviews with clear problem framing, architecture direction, and execution readiness.",
     accent: "cyan",
     iconName: "Trophy",
     decks: [
@@ -14,40 +14,40 @@ export const deckCollections: DeckCollection[] = [
         id: "sih-lawai",
         title: "LawAI: AI-Powered Legal Assistant",
         summary:
-          "Smart India Hackathon 2024 finalist solution designed to improve access to legal guidance through assisted FIR workflows, conversational support, and secure document handling.",
+          "SIH 2024 finalist concept focused on improving legal access through guided FIR drafting, conversational legal support, and secure case-document handling.",
         badge: "SIH Finalist",
-        tag: "AI + LegalTech | 2024",
+        tag: "AI + LegalTech - 2024",
         meta: [
           {
             label: "Impact",
-            value: "Expands legal support access for large-scale public use",
+            value: "Improves access to legal guidance at public scale",
           },
           {
             label: "Highlights",
-            value: "Guided FIR builder, AI legal assistant, searchable legal knowledge",
+            value: "Guided FIR workflow, AI legal support, searchable legal reference",
           },
           {
             label: "Tech Stack",
             value: "React Native, Expo, AI/ML",
           },
         ],
-        primaryLink: { href: "/decks/sih-lawai.pdf", label: "View Deck" },
+        primaryLink: { href: "/decks/sih-lawai.pdf", label: "Open Deck" },
         secondaryLink: {
           href: "https://github.com/Anish-2005/LawAI-PrivacyV",
-          label: "View on GitHub",
+          label: "Source Repository",
         },
       },
       {
         id: "sih-nyantra",
         title: "Nyantra: DBT Social Assistance Platform",
         summary:
-          "Smart India Hackathon 2025 finalist platform focused on improving Direct Benefit Transfer operations with ML-assisted workflow support and transparent disbursement visibility.",
+          "SIH 2025 finalist platform designed to streamline Direct Benefit Transfer operations with ML-assisted workflows and transparent disbursement tracking.",
         badge: "SIH Finalist",
-        tag: "Gov Welfare | 2025",
+        tag: "GovTech and Welfare - 2025",
         meta: [
           {
             label: "Mission",
-            value: "Improve delivery quality for DBT welfare schemes",
+            value: "Increase delivery quality across DBT welfare programs",
           },
           {
             label: "Status",
@@ -58,20 +58,20 @@ export const deckCollections: DeckCollection[] = [
             value: "Next.js, TypeScript, ML",
           },
         ],
-        primaryLink: { href: "/decks/sih-nyantra.pdf", label: "View Deck" },
+        primaryLink: { href: "/decks/sih-nyantra.pdf", label: "Open Deck" },
         secondaryLink: {
           href: "https://github.com/Anish-2005/Nyantra",
-          label: "Project Overview",
+          label: "Source Repository",
         },
       },
     ],
   },
   {
     id: "internal",
-    label: "Internal and Academic",
-    title: "Pre-Final Internal Project Decks",
+    label: "Internal Validation Track",
+    title: "Pre-Final Internal Decks",
     description:
-      "Institutional iterations and mentor-review decks that informed final SIH submissions.",
+      "Institutional and mentor-review presentations that shaped final SIH submissions before jury rounds.",
     accent: "emerald",
     iconName: "BookOpen",
     decks: [
@@ -79,9 +79,9 @@ export const deckCollections: DeckCollection[] = [
         id: "internal-vanmitra",
         title: "VanMitra: Forest Rights Atlas and DSS",
         summary:
-          "Internal SIH 2025 concept combining geospatial rights mapping, OCR-assisted claims, and decision-support analytics.",
+          "Internal SIH 2025 concept combining geospatial rights mapping, OCR-assisted claims processing, and decision-support analytics.",
         badge: "Internal SIH",
-        tag: "ForestTech | 2025",
+        tag: "ForestTech - 2025",
         meta: [
           {
             label: "Use Case",
@@ -98,20 +98,20 @@ export const deckCollections: DeckCollection[] = [
         ],
         primaryLink: {
           href: "/decks/internal-vanmitra.pdf",
-          label: "View Deck",
+          label: "Open Deck",
         },
         secondaryLink: {
           href: "https://github.com/Anish-2005/VanMitra",
-          label: "View on GitHub",
+          label: "Source Repository",
         },
       },
       {
         id: "internal-chatbot-ticketing",
         title: "Museum Concierge: Chatbot Ticketing System",
         summary:
-          "Internal SIH 2024 build using conversational AI to automate booking, visitor guidance, and queue insights for museum operations.",
+          "Internal SIH 2024 solution using conversational AI to automate ticketing, visitor guidance, and queue visibility for museum operations.",
         badge: "Internal SIH",
-        tag: "Museums | 2024",
+        tag: "Museums - 2024",
         meta: [
           {
             label: "Use Case",
@@ -128,11 +128,11 @@ export const deckCollections: DeckCollection[] = [
         ],
         primaryLink: {
           href: "/decks/internal-chatbot-ticketing.pdf",
-          label: "View Deck",
+          label: "Open Deck",
         },
         secondaryLink: {
           href: "https://github.com/Anish-2005/Online-Chatbot-Based-Ticketing-System",
-          label: "Project Overview",
+          label: "Source Repository",
         },
       },
     ],
@@ -140,9 +140,9 @@ export const deckCollections: DeckCollection[] = [
   {
     id: "non-sih",
     label: "Selected Work",
-    title: "Non-SIH Presentation Decks",
+    title: "Independent and Client Decks",
     description:
-      "Reserved for startup, client, and independent innovation decks outside the SIH pipeline.",
+      "Reserved for startup, client, and independent innovation presentations outside the SIH track.",
     accent: "violet",
     iconName: "Sparkles",
     decks: [],
@@ -158,8 +158,8 @@ export const totalDecks = deckCollections.reduce(
 export const heroStats: HeroStat[] = [
   { label: "Total Decks", value: totalDecks.toString(), suffix: "+" },
   { label: "Focus Areas", value: "3", suffix: " Domains" },
-  { label: "Finalist Wins", value: "2", suffix: " SIH" },
+  { label: "SIH Finalist Entries", value: "2" },
 ];
 
-export const focusAreasList = ["LegalTech", "Welfare and GovTech", "ForestTech"];
+export const focusAreasList = ["LegalTech", "GovTech and Welfare", "ForestTech"];
 

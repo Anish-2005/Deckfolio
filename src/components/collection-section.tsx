@@ -74,7 +74,7 @@ export function CollectionSection({ collection }: CollectionSectionProps) {
         </div>
 
         <div className="min-w-[8.2rem] rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-2)] px-3 py-2 text-right">
-          <p className="text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--text-muted)]">Deck count</p>
+          <p className="text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--text-muted)]">Total decks</p>
           <p className="mt-1 text-2xl font-extrabold text-[color:var(--text-strong)]">{collection.decks.length}</p>
         </div>
       </motion.div>
@@ -90,9 +90,9 @@ export function CollectionSection({ collection }: CollectionSectionProps) {
           <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-1)] text-[color:var(--text-muted)]">
             <Clock3 size={19} />
           </div>
-          <h3 className="text-lg font-semibold text-[color:var(--text-strong)]">Flagship decks in progress</h3>
+          <h3 className="text-lg font-semibold text-[color:var(--text-strong)]">Additional decks in preparation</h3>
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[color:var(--text-base)]">
-            This collection is reserved for startup and client-facing case-study decks. New entries will be published soon.
+            This section is reserved for independent and client-facing case studies. New presentations will be published here soon.
           </p>
         </motion.div>
       )}

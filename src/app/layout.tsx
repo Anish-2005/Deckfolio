@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Deckfolio - Presentation Showcase",
   description:
-    "Curated Smart India Hackathon finalist decks and internal presentation archive for recruiters, juries, and faculty reviews.",
+    "Portfolio archive of Smart India Hackathon finalist decks and internal project presentations for recruiter, jury, and mentor review.",
   keywords: [
     "Deckfolio",
     "presentation portfolio",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Deckfolio - Presentation Showcase",
     description:
-      "Smart India Hackathon finalist decks plus internal institutional presentations in one polished view.",
+      "Smart India Hackathon finalist decks and internal project presentations in a reviewer-ready portfolio.",
     url: "https://deckfolio.example.com",
     siteName: "Deckfolio",
     type: "website",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Deckfolio - Presentation Showcase",
     description:
-      "Curated SIH finalist decks and internal innovations in one recruiter-ready portfolio.",
+      "SIH finalist decks and internal project artifacts presented in one recruiter-ready portfolio.",
     images: ["/og-deckfolio.png"],
   },
   robots: {

@@ -25,8 +25,8 @@ const fadeIn = {
 };
 
 const quickLinks = [
-  { label: "Hero", href: "#top" },
-  { label: "Collections", href: "#collections" },
+  { label: "Top", href: "#top" },
+  { label: "Deck Library", href: "#collections" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -72,16 +72,16 @@ export function Footer() {
           </div>
 
           <h2 className="text-2xl font-extrabold leading-tight tracking-[-0.02em] text-[color:var(--text-strong)] sm:text-[2rem]">
-            Keep the portfolio review flow <span className="brand-gradient-text">clear, concise, and fast</span>.
+            Built for <span className="brand-gradient-text">fast shortlisting and deeper technical discussions</span>.
           </h2>
 
           <p className="max-w-xl text-sm leading-7 text-[color:var(--text-base)] sm:text-[0.94rem]">
-            Add decks, update metadata, and keep this repository as your single source of truth for mentor, jury, and recruiter walkthroughs.
+            Use this archive as a single source of truth for finalist work, internal validation, and project evolution across review rounds.
           </p>
 
           <a href="mailto:anish@example.com?subject=Deckfolio%20Collaboration" className="btn btn-primary">
             <Mail size={15} />
-            Collaborate
+            Start a Conversation
           </a>
         </motion.section>
 
@@ -127,7 +127,7 @@ export function Footer() {
 
       <motion.div variants={fadeIn} className="soft-divider mt-8 pt-5 text-xs text-[color:var(--text-muted)] sm:flex sm:items-center sm:justify-between">
         <p>© {new Date().getFullYear()} Deckfolio. All rights reserved.</p>
-        <p className="mt-2 sm:mt-0">Built with Next.js, Framer Motion, and Tailwind CSS.</p>
+        <p className="mt-2 sm:mt-0">Built with Next.js, Framer Motion, and Tailwind CSS for portfolio-grade delivery.</p>
       </motion.div>
     </motion.footer>
   );

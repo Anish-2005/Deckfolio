@@ -26,18 +26,18 @@ const fadeUp = {
 
 const proofItems = [
   {
-    title: "Decision-ready context",
-    body: "Every card captures what problem was solved, which stack was used, and where to view the deck instantly.",
+    title: "Context in one glance",
+    body: "Each card summarizes problem statement, implementation direction, and a direct path to the full presentation.",
     icon: ShieldCheck,
   },
   {
-    title: "Recruiter-first navigation",
-    body: "Collections are structured by relevance so review panels and hiring teams can find work samples without friction.",
+    title: "Structured for screening",
+    body: "Collections are grouped for hiring and jury workflows, reducing time spent locating the right work sample.",
     icon: BriefcaseBusiness,
   },
   {
-    title: "Fast review cadence",
-    body: "Metadata, links, and visual hierarchy are tuned for short-listing in under two minutes.",
+    title: "Shortlist friendly",
+    body: "Clear metadata and consistent hierarchy make technical shortlisting fast and repeatable.",
     icon: TimerReset,
   },
 ];
@@ -57,25 +57,25 @@ export function Hero() {
           <div className="surface-panel flex flex-col gap-6 p-6 sm:p-8">
             <motion.span variants={fadeUp} className="kicker w-fit">
               <Sparkles size={13} />
-              SIH + Internal Innovation Decks
+              Smart India Hackathon and Internal Deck Archive
             </motion.span>
 
             <motion.div variants={fadeUp} className="space-y-4">
               <h1 className="section-title max-w-3xl">
-                Professional pitch decks curated for <span className="brand-gradient-text">juries, recruiters, and mentors</span>.
+                Presentation decks organized for <span className="brand-gradient-text">rapid technical evaluation</span>.
               </h1>
               <p className="section-description max-w-2xl">
-                Deckfolio presents Smart India Hackathon finalist work and supporting internal builds in a single polished showcase with direct links to every document.
+                Deckfolio centralizes finalist and internal project presentations so reviewers can move from summary to artifact in one click.
               </p>
             </motion.div>
 
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
               <a href="#collections" className="btn btn-primary">
-                Explore Collections
+                Review Deck Library
                 <ArrowRight size={15} />
               </a>
               <a href="mailto:anish@example.com?subject=Deckfolio%20Case%20Study" className="btn btn-secondary">
-                Request Case Study
+                Request Full Portfolio
               </a>
             </motion.div>
 
@@ -104,8 +104,8 @@ export function Hero() {
 
           <motion.aside variants={fadeUp} className="hero-proof">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">Why this layout works</p>
-              <span className="chip chip-cyan">Portfolio UX</span>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">Why reviewers move faster</p>
+              <span className="chip chip-cyan">Screening Ready</span>
             </div>
 
             <div className="hero-proof-list">

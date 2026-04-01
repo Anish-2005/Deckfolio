@@ -42,17 +42,17 @@ export function Navbar() {
                 Deckfolio
               </p>
               <p className="text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
-                Presentation Archive
+                Project Deck Portfolio
               </p>
             </div>
           </a>
 
           <div className="hidden items-center gap-6 md:flex">
             <a href="#collections" className="nav-link">
-              Collections
+              Deck Library
             </a>
             <a href="#contact" className="nav-link">
-              Contact
+              Reach Out
             </a>
           </div>
 
@@ -60,9 +60,9 @@ export function Navbar() {
             <ThemeToggle />
             <a href="#collections" className="btn btn-secondary hidden sm:inline-flex">
               <FileText size={15} />
-              Browse Decks
+              Open Deck Library
             </a>
-            <a href="#collections" className="btn btn-primary sm:hidden" aria-label="Browse decks">
+            <a href="#collections" className="btn btn-primary sm:hidden" aria-label="Open deck library">
               <ArrowDownRight size={16} />
             </a>
           </div>
