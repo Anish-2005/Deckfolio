@@ -27,21 +27,21 @@ export function Navbar() {
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] as const }}
     >
       <div className={`nav-shell ${scrolled ? "is-scrolled" : ""}`}>
-        <div className="page-container flex items-center justify-between py-3">
+        <div className="page-container flex items-center justify-between py-2.5 sm:py-3">
           <a href="#top" className="flex items-center gap-3">
             <Image
               src="/deckfolio.png"
-              width={36}
-              height={36}
+              width={32}
+              height={32}
               alt="Deckfolio logo"
               priority
-              className="rounded-lg"
+              className="rounded-lg sm:h-9 sm:w-9"
             />
             <div className="leading-tight">
               <p className="text-sm font-extrabold tracking-[0.02em] text-[color:var(--text-strong)]">
                 Deckfolio
               </p>
-              <p className="text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+              <p className="hidden text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--text-muted)] sm:block">
                 Project Deck Portfolio
               </p>
             </div>
@@ -62,7 +62,11 @@ export function Navbar() {
               <FileText size={15} />
               Open Deck Library
             </a>
-            <a href="#deck-explorer" className="btn btn-primary sm:hidden" aria-label="Open deck library">
+            <a
+              href="#deck-explorer"
+              className="btn btn-primary h-10 w-10 rounded-xl p-0 sm:hidden"
+              aria-label="Open deck library"
+            >
               <ArrowDownRight size={16} />
             </a>
           </div>

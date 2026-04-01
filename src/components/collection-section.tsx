@@ -77,7 +77,7 @@ export function CollectionSection({ collection, totalDeckCount }: CollectionSect
           </p>
         </div>
 
-        <div className="min-w-[8.2rem] rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-2)] px-3 py-2 text-right">
+        <div className="min-w-[8.2rem] self-start rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-2)] px-3 py-2 text-right sm:self-auto">
           <p className="text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--text-muted)]">
             {showFilteredCount ? "Visible / total" : "Total decks"}
           </p>

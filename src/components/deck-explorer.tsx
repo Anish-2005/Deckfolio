@@ -300,7 +300,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     <div className="flex flex-col gap-6 sm:gap-8 lg:gap-10">
       <section
         id="deck-explorer"
-        className="section-shell explorer-shell overflow-hidden p-5 sm:p-7 lg:p-8"
+        className="section-shell explorer-shell overflow-hidden p-4 sm:p-7 lg:p-8"
       >
         <div className="collection-glow collection-glow-cyan" aria-hidden />
 
@@ -372,7 +372,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
           <div className="explorer-filter-group">
             <p className="explorer-filter-label">Track</p>
-            <div className="explorer-filter-row">
+            <div className="explorer-filter-row explorer-filter-row-scroll">
               {trackOptions.map((option) => {
                 const isResolvedActive = resolvedTrackFilter === option.id;
                 const isDisabled = option.id !== "all" && option.count === 0;
@@ -395,7 +395,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
           <div className="explorer-filter-group">
             <p className="explorer-filter-label">Focus Area</p>
-            <div className="explorer-filter-row">
+            <div className="explorer-filter-row explorer-filter-row-scroll">
               {focusOptions.map((option) => {
                 const isActive = resolvedFocusFilter === option;
                 const optionLabel = option === "all" ? "All Areas" : option;
@@ -417,7 +417,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
           {hasActiveFilters ? (
             <div className="explorer-active-filters" role="region" aria-label="Active filters">
               <p className="explorer-filter-label">Active Filters</p>
-              <div className="explorer-filter-row">
+              <div className="explorer-filter-row explorer-filter-row-wrap">
                 {normalizedQuery ? (
                   <button type="button" className="explorer-filter-pill is-active" onClick={() => setSearchQuery("")}>
                     Search: &quot;{searchQuery.trim()}&quot;

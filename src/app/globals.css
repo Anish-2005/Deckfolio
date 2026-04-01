@@ -247,6 +247,7 @@ a {
   gap: 0.45rem;
   border-radius: 0.9rem;
   padding: 0.72rem 1.15rem;
+  min-height: 2.7rem;
   font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -548,17 +549,30 @@ a {
 
 .explorer-filter-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.2rem;
+}
+
+.explorer-filter-row-wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+  padding-bottom: 0;
 }
 
 .explorer-filter-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   border: 1px solid var(--line-soft);
   border-radius: 999px;
   padding: 0.42rem 0.78rem;
+  min-height: 2.2rem;
   background: var(--surface-2);
   color: var(--text-base);
   font-size: 0.74rem;
@@ -625,6 +639,14 @@ a {
 .explorer-results-anchor {
   position: relative;
   top: -5.5rem;
+}
+
+.explorer-filter-row::-webkit-scrollbar {
+  height: 5px;
+}
+
+.explorer-filter-row::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--line-strong), transparent 10%);
 }
 
 .collection-glow {
@@ -830,6 +852,40 @@ a {
     padding: 0.68rem 0.98rem;
   }
 
+  .section-title {
+    font-size: clamp(1.45rem, 1.2rem + 2.6vw, 1.85rem);
+  }
+
+  .section-description {
+    font-size: 0.93rem;
+    line-height: 1.62;
+  }
+
+  .hero-proof {
+    padding: 1rem;
+  }
+
+  .hero-proof-item {
+    padding: 0.68rem;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .deck-card-title {
+    font-size: 1.12rem;
+  }
+
+  .explorer-search-input {
+    font-size: 16px;
+  }
+
   .explorer-sort-select {
     min-width: 100%;
   }
@@ -842,8 +898,24 @@ a {
     align-items: stretch;
   }
 
+  .explorer-summary {
+    align-items: stretch;
+  }
+
+  .explorer-summary .btn {
+    width: 100%;
+  }
+
   .section-shell {
     border-radius: 1.25rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .explorer-filter-row-scroll {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
   }
 }
 

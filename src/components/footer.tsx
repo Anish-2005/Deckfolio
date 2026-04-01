@@ -79,7 +79,7 @@ export function Footer() {
             Use this archive as a single source of truth for finalist work, internal validation, and project evolution across review rounds.
           </p>
 
-          <a href="mailto:anish@example.com?subject=Deckfolio%20Collaboration" className="btn btn-primary">
+          <a href="mailto:anish@example.com?subject=Deckfolio%20Collaboration" className="btn btn-primary w-full sm:w-auto">
             <Mail size={15} />
             Start a Conversation
           </a>
@@ -118,7 +118,7 @@ export function Footer() {
             })}
           </div>
 
-          <button type="button" onClick={scrollToTop} className="btn btn-secondary mt-2">
+          <button type="button" onClick={scrollToTop} className="btn btn-secondary mt-2 w-full sm:w-auto">
             Back to top
             <ArrowUpRight size={15} />
           </button>

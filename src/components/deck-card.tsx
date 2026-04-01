@@ -59,7 +59,7 @@ export function DeckCard({ deck, accent, index }: DeckCardProps) {
           href={deck.primaryLink.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn-primary min-w-[9rem] flex-1"
+          className="btn btn-primary w-full sm:min-w-[9rem] sm:flex-1"
         >
           <FileText size={15} />
           {deck.primaryLink.label}
@@ -70,7 +70,7 @@ export function DeckCard({ deck, accent, index }: DeckCardProps) {
             href={deck.secondaryLink.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-secondary min-w-[9rem] flex-1"
+            className="btn btn-secondary w-full sm:min-w-[9rem] sm:flex-1"
           >
             <ExternalLink size={15} />
             {deck.secondaryLink.label}

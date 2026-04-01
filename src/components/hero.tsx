@@ -44,17 +44,17 @@ const proofItems = [
 
 export function Hero() {
   return (
-    <section id="top" className="relative pb-10 pt-28 sm:pb-14 sm:pt-32 lg:pt-36">
+    <section id="top" className="relative pb-10 pt-24 sm:pb-14 sm:pt-32 lg:pt-36">
       <div className="hero-grid pointer-events-none absolute inset-0 -z-10" aria-hidden />
 
       <div className="page-container">
         <motion.div
-          className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:gap-8"
+          className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:gap-8"
           variants={container}
           initial="hidden"
           animate="show"
         >
-          <div className="surface-panel flex flex-col gap-6 p-6 sm:p-8">
+          <div className="surface-panel flex flex-col gap-6 p-5 sm:p-8">
             <motion.span variants={fadeUp} className="kicker w-fit">
               <Sparkles size={13} />
               Smart India Hackathon and Internal Deck Archive
@@ -69,12 +69,15 @@ export function Hero() {
               </p>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
-              <a href="#deck-explorer" className="btn btn-primary">
+            <motion.div variants={fadeUp} className="flex w-full flex-wrap items-center gap-2.5 sm:gap-3">
+              <a href="#deck-explorer" className="btn btn-primary w-full sm:w-auto">
                 Review Deck Library
                 <ArrowRight size={15} />
               </a>
-              <a href="mailto:anish@example.com?subject=Deckfolio%20Case%20Study" className="btn btn-secondary">
+              <a
+                href="mailto:anish@example.com?subject=Deckfolio%20Case%20Study"
+                className="btn btn-secondary w-full sm:w-auto"
+              >
                 Request Full Portfolio
               </a>
             </motion.div>
