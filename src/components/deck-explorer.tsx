@@ -11,7 +11,7 @@ import {
 } from "react";
 import { Check, Copy, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { CollectionSection } from "@/components/collection-section";
 import type { Deck, DeckCollection } from "@/lib/types";
 
@@ -64,6 +64,36 @@ const sourceOptions: Array<{ id: SourceFilter; label: string }> = [
   { id: "with-repo", label: "With Repository" },
   { id: "deck-only", label: "Deck Only" },
 ];
+
+const chipMotion = {
+  initial: { opacity: 0, y: 8, scale: 0.96 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, y: -6, scale: 0.95 },
+  transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
+};
+
+function AnimatedCount({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) {
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.span
+        key={value}
+        className={className}
+        initial={{ opacity: 0, y: 7, filter: "blur(2px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        exit={{ opacity: 0, y: -7, filter: "blur(2px)" }}
+        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {value}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
 
 function parseFocusParam(rawFocus: string | null): string[] {
   if (!rawFocus) {
@@ -631,6 +661,15 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  const handleSheetDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      if (info.offset.y > 120 || info.velocity.y > 650) {
+        setIsMobileFilterOpen(false);
+      }
+    },
+    [],
+  );
+
   const copyFilteredView = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -793,7 +832,9 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               >
                 Filters
                 {activeFilterCount > 0 ? (
-                  <span className="explorer-mobile-count">{activeFilterCount}</span>
+                  <span className="explorer-mobile-count">
+                    <AnimatedCount value={activeFilterCount} />
+                  </span>
                 ) : null}
               </button>
 
@@ -994,7 +1035,11 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
           <div className="explorer-summary">
             <p className="text-sm text-[color:var(--text-base)]">
-              Showing <span className="font-bold text-[color:var(--text-strong)]">{visibleDeckCount}</span> of{" "}
+              Showing{" "}
+              <span className="font-bold text-[color:var(--text-strong)]">
+                <AnimatedCount value={visibleDeckCount} />
+              </span>{" "}
+              of{" "}
               <span className="font-bold text-[color:var(--text-strong)]">{totalDeckCount}</span> decks
             </p>
 
