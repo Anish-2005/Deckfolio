@@ -1,6 +1,6 @@
 ﻿import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
-import { CollectionSection } from "@/components/collection-section";
+import { DeckExplorer } from "@/components/deck-explorer";
 import { Footer } from "@/components/footer";
 import { deckCollections } from "@/lib/data";
 
@@ -14,10 +14,8 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      <main id="collections" className="page-container flex flex-col gap-6 pb-10 sm:gap-8 lg:gap-10">
-        {deckCollections.map((collection) => (
-          <CollectionSection key={collection.id} collection={collection} />
-        ))}
+      <main id="collections" className="page-container pb-10 sm:pb-12">
+        <DeckExplorer collections={deckCollections} />
       </main>
 
       <div className="page-container pb-10 sm:pb-14">
@@ -26,4 +24,3 @@ export default function Home() {
     </div>
   );
 }
-

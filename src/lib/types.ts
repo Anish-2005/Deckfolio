@@ -19,6 +19,8 @@ export type Deck = {
   summary: string;
   badge: string;
   tag: string;
+  focusArea: string;
+  year: number;
   meta: DeckMeta[];
   primaryLink: DeckLink;
   secondaryLink?: DeckLink;

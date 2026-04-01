@@ -17,6 +17,8 @@ export const deckCollections: DeckCollection[] = [
           "SIH 2024 finalist concept focused on improving legal access through guided FIR drafting, conversational legal support, and secure case-document handling.",
         badge: "SIH Finalist",
         tag: "AI + LegalTech - 2024",
+        focusArea: "LegalTech",
+        year: 2024,
         meta: [
           {
             label: "Impact",
@@ -44,6 +46,8 @@ export const deckCollections: DeckCollection[] = [
           "SIH 2025 finalist platform designed to streamline Direct Benefit Transfer operations with ML-assisted workflows and transparent disbursement tracking.",
         badge: "SIH Finalist",
         tag: "GovTech and Welfare - 2025",
+        focusArea: "GovTech and Welfare",
+        year: 2025,
         meta: [
           {
             label: "Mission",
@@ -82,6 +86,8 @@ export const deckCollections: DeckCollection[] = [
           "Internal SIH 2025 concept combining geospatial rights mapping, OCR-assisted claims processing, and decision-support analytics.",
         badge: "Internal SIH",
         tag: "ForestTech - 2025",
+        focusArea: "ForestTech",
+        year: 2025,
         meta: [
           {
             label: "Use Case",
@@ -112,6 +118,8 @@ export const deckCollections: DeckCollection[] = [
           "Internal SIH 2024 solution using conversational AI to automate ticketing, visitor guidance, and queue visibility for museum operations.",
         badge: "Internal SIH",
         tag: "Museums - 2024",
+        focusArea: "GovTech and Welfare",
+        year: 2024,
         meta: [
           {
             label: "Use Case",

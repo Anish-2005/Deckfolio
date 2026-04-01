@@ -42,12 +42,16 @@ const accentMap: Record<string, { chip: string; glow: string }> = {
 
 interface CollectionSectionProps {
   collection: DeckCollection;
+  totalDeckCount?: number;
 }
 
-export function CollectionSection({ collection }: CollectionSectionProps) {
+export function CollectionSection({ collection, totalDeckCount }: CollectionSectionProps) {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const accent = accentMap[collection.accent] ?? accentMap.cyan;
+  const visibleDeckCount = collection.decks.length;
+  const resolvedTotalDeckCount = totalDeckCount ?? visibleDeckCount;
+  const showFilteredCount = resolvedTotalDeckCount !== visibleDeckCount;
 
   return (
     <motion.section
@@ -74,12 +78,16 @@ export function CollectionSection({ collection }: CollectionSectionProps) {
         </div>
 
         <div className="min-w-[8.2rem] rounded-xl border border-[color:var(--line-soft)] bg-[color:var(--surface-2)] px-3 py-2 text-right">
-          <p className="text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--text-muted)]">Total decks</p>
-          <p className="mt-1 text-2xl font-extrabold text-[color:var(--text-strong)]">{collection.decks.length}</p>
+          <p className="text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-[color:var(--text-muted)]">
+            {showFilteredCount ? "Visible / total" : "Total decks"}
+          </p>
+          <p className="mt-1 text-2xl font-extrabold text-[color:var(--text-strong)]">
+            {showFilteredCount ? `${visibleDeckCount} / ${resolvedTotalDeckCount}` : visibleDeckCount}
+          </p>
         </div>
       </motion.div>
 
-      {collection.decks.length > 0 ? (
+      {visibleDeckCount > 0 ? (
         <motion.div variants={sectionVariants} className="deck-grid mt-6 sm:mt-7">
           {collection.decks.map((deck, index) => (
             <DeckCard key={deck.id} deck={deck} accent={collection.accent} index={index} />
