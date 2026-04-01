@@ -421,6 +421,153 @@ a {
   background: var(--surface-2);
 }
 
+.explorer-shell {
+  position: relative;
+}
+
+.explorer-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.95rem;
+  background: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+}
+
+.explorer-search-wrap:focus-within {
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-2), transparent 82%);
+}
+
+.explorer-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.explorer-search-input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.82rem 2.4rem 0.82rem 2.45rem;
+}
+
+.explorer-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.explorer-search-input:focus {
+  outline: none;
+}
+
+.explorer-search-clear {
+  position: absolute;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--text-base);
+  background: transparent;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.explorer-search-clear:hover {
+  color: var(--text-strong);
+  border-color: var(--line-soft);
+  background: var(--surface-2);
+}
+
+.explorer-filter-group {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.explorer-filter-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.explorer-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.explorer-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 0.42rem 0.78rem;
+  background: var(--surface-2);
+  color: var(--text-base);
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1.2;
+  transition: border-color 170ms ease, background-color 170ms ease, color 170ms ease;
+}
+
+.explorer-filter-pill:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  color: var(--text-strong);
+}
+
+.explorer-filter-pill:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.explorer-filter-pill.is-active {
+  border-color: color-mix(in srgb, var(--brand-2), transparent 52%);
+  background: color-mix(in srgb, var(--brand-2), transparent 84%);
+  color: var(--text-strong);
+}
+
+.explorer-pill-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  padding-inline: 0.3rem;
+  border: 1px solid var(--line-soft);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  background: var(--surface-1);
+}
+
+.explorer-filter-pill.is-active .explorer-pill-count {
+  color: var(--text-strong);
+  border-color: color-mix(in srgb, var(--brand-2), transparent 58%);
+}
+
+.explorer-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.35rem;
+}
+
+.explorer-reset {
+  min-height: 2.2rem;
+}
+
 .collection-glow {
   position: absolute;
   inset: 0;

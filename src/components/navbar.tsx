@@ -48,7 +48,7 @@ export function Navbar() {
           </a>
 
           <div className="hidden items-center gap-6 md:flex">
-            <a href="#collections" className="nav-link">
+            <a href="#deck-explorer" className="nav-link">
               Deck Library
             </a>
             <a href="#contact" className="nav-link">
@@ -58,11 +58,11 @@ export function Navbar() {
 
           <div className="flex items-center gap-2.5">
             <ThemeToggle />
-            <a href="#collections" className="btn btn-secondary hidden sm:inline-flex">
+            <a href="#deck-explorer" className="btn btn-secondary hidden sm:inline-flex">
               <FileText size={15} />
               Open Deck Library
             </a>
-            <a href="#collections" className="btn btn-primary sm:hidden" aria-label="Open deck library">
+            <a href="#deck-explorer" className="btn btn-primary sm:hidden" aria-label="Open deck library">
               <ArrowDownRight size={16} />
             </a>
           </div>

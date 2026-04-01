@@ -26,7 +26,7 @@ const fadeIn = {
 
 const quickLinks = [
   { label: "Top", href: "#top" },
-  { label: "Deck Library", href: "#collections" },
+  { label: "Deck Library", href: "#deck-explorer" },
   { label: "Contact", href: "#contact" },
 ];
 

@@ -70,7 +70,7 @@ export function Hero() {
             </motion.div>
 
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
-              <a href="#collections" className="btn btn-primary">
+              <a href="#deck-explorer" className="btn btn-primary">
                 Review Deck Library
                 <ArrowRight size={15} />
               </a>
