@@ -1,31 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Manrope } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f9fc" },
-    { media: "(prefers-color-scheme: dark)", color: "#04060c" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f5f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#080b12" },
   ],
   width: "device-width",
   initialScale: 1,
 };
 
 export const metadata: Metadata = {
-  title: "Deckfolio — Presentation Showcase",
+  title: "Deckfolio - Presentation Showcase",
   description:
     "Curated Smart India Hackathon finalist decks and internal presentation archive for recruiters, juries, and faculty reviews.",
   keywords: [
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
     apple: "/deckfolio.png",
   },
   openGraph: {
-    title: "Deckfolio — Presentation Showcase",
+    title: "Deckfolio - Presentation Showcase",
     description:
       "Smart India Hackathon finalist decks plus internal institutional presentations in one polished view.",
     url: "https://deckfolio.example.com",
@@ -56,13 +57,13 @@ export const metadata: Metadata = {
         url: "/og-deckfolio.png",
         width: 1200,
         height: 630,
-        alt: "Deckfolio – Presentation Showcase",
+        alt: "Deckfolio - Presentation Showcase",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deckfolio — Presentation Showcase",
+    title: "Deckfolio - Presentation Showcase",
     description:
       "Curated SIH finalist decks and internal innovations in one recruiter-ready portfolio.",
     images: ["/og-deckfolio.png"],
@@ -85,9 +86,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${manrope.variable} ${plexMono.variable} antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
