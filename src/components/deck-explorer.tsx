@@ -11,7 +11,12 @@ import {
 } from "react";
 import { Check, Copy, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  type PanInfo,
+  useDragControls,
+} from "framer-motion";
 import { CollectionSection } from "@/components/collection-section";
 import type { Deck, DeckCollection } from "@/lib/types";
 
@@ -26,6 +31,7 @@ type FilteredCollection = {
 
 type SortOrder = "newest" | "oldest" | "az" | "relevance";
 type SourceFilter = "all" | "with-repo" | "deck-only";
+type SheetSnap = "half" | "full";
 
 type PersistedExplorerState = {
   q: string;
@@ -280,11 +286,15 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     () => parseSortOrder(searchParams.get("sort") ?? persistedState?.sort ?? null),
   );
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [sheetSnap, setSheetSnap] = useState<SheetSnap>("half");
+  const [sheetHalfOffset, setSheetHalfOffset] = useState(250);
   const [linkCopied, setLinkCopied] = useState(false);
 
   const copyTimeoutRef = useRef<number | null>(null);
+  const lockedScrollYRef = useRef(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const dragControls = useDragControls();
 
   const deferredSearch = useDeferredValue(searchQuery);
   const normalizedQuery = deferredSearch.trim().toLowerCase();
@@ -500,11 +510,56 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
       return;
     }
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const { style } = document.body;
+    const previousStyles = {
+      overflow: style.overflow,
+      position: style.position,
+      top: style.top,
+      left: style.left,
+      right: style.right,
+      width: style.width,
+      touchAction: style.touchAction,
+    };
+
+    lockedScrollYRef.current = window.scrollY;
+
+    style.overflow = "hidden";
+    style.position = "fixed";
+    style.top = `-${lockedScrollYRef.current}px`;
+    style.left = "0";
+    style.right = "0";
+    style.width = "100%";
+    style.touchAction = "none";
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      style.overflow = previousStyles.overflow;
+      style.position = previousStyles.position;
+      style.top = previousStyles.top;
+      style.left = previousStyles.left;
+      style.right = previousStyles.right;
+      style.width = previousStyles.width;
+      style.touchAction = previousStyles.touchAction;
+      window.scrollTo(0, lockedScrollYRef.current);
+    };
+  }, [isMobileFilterOpen]);
+
+  useEffect(() => {
+    if (!isMobileFilterOpen || typeof window === "undefined") {
+      return;
+    }
+
+    const updateSnapOffset = () => {
+      const computedOffset = Math.round(
+        Math.min(380, Math.max(180, window.innerHeight * 0.34)),
+      );
+      setSheetHalfOffset(computedOffset);
+    };
+
+    updateSnapOffset();
+    window.addEventListener("resize", updateSnapOffset);
+
+    return () => {
+      window.removeEventListener("resize", updateSnapOffset);
     };
   }, [isMobileFilterOpen]);
 
@@ -637,7 +692,20 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     [filteredCollections],
   );
 
+  const triggerHaptic = useCallback(() => {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(8);
+    }
+  }, []);
+
+  const openMobileFilters = useCallback(() => {
+    triggerHaptic();
+    setSheetSnap("half");
+    setIsMobileFilterOpen(true);
+  }, [triggerHaptic]);
+
   const resetFilters = useCallback(() => {
+    triggerHaptic();
     setSearchQuery("");
     setTrackFilter("all");
     setFocusFilters([]);
@@ -645,9 +713,39 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     setSourceFilter("all");
     setRepoOnly(false);
     setSortOrder("newest");
-  }, []);
+  }, [triggerHaptic]);
+
+  const applyTrackFilter = useCallback(
+    (nextTrack: string) => {
+      triggerHaptic();
+      setTrackFilter(nextTrack);
+    },
+    [triggerHaptic],
+  );
+
+  const applyYearFilter = useCallback(
+    (nextYear: string) => {
+      triggerHaptic();
+      setYearFilter(nextYear);
+    },
+    [triggerHaptic],
+  );
+
+  const applySourceFilter = useCallback(
+    (nextSource: SourceFilter) => {
+      triggerHaptic();
+      setSourceFilter(nextSource);
+    },
+    [triggerHaptic],
+  );
+
+  const toggleRepoOnly = useCallback(() => {
+    triggerHaptic();
+    setRepoOnly((previousState) => !previousState);
+  }, [triggerHaptic]);
 
   const toggleFocusFilter = useCallback((focusArea: string) => {
+    triggerHaptic();
     setFocusFilters((previousFilters) => {
       if (previousFilters.includes(focusArea)) {
         return previousFilters.filter((item) => item !== focusArea);
@@ -655,7 +753,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
       return [...previousFilters, focusArea];
     });
-  }, []);
+  }, [triggerHaptic]);
 
   const jumpToResults = useCallback(() => {
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -663,8 +761,18 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
   const handleSheetDragEnd = useCallback(
     (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      if (info.offset.y > 120 || info.velocity.y > 650) {
+      if (info.offset.y > 180 || info.velocity.y > 920) {
         setIsMobileFilterOpen(false);
+        return;
+      }
+
+      if (info.offset.y < -70 || info.velocity.y < -620) {
+        setSheetSnap("full");
+        return;
+      }
+
+      if (info.offset.y > 60 || info.velocity.y > 260) {
+        setSheetSnap("half");
       }
     },
     [],
@@ -688,6 +796,8 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
   }, []);
 
   const applyPreset = useCallback((preset: "sih-2025" | "internal-repo" | "legaltech") => {
+    triggerHaptic();
+
     if (preset === "sih-2025") {
       setTrackFilter("sih");
       setYearFilter("2025");
@@ -719,7 +829,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
     }
 
     setIsMobileFilterOpen(false);
-  }, []);
+  }, [triggerHaptic]);
 
   const activeTrackLabel =
     trackOptions.find((option) => option.id === resolvedTrackFilter)?.label ?? "Selected Track";
@@ -811,7 +921,10 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               <select
                 id="deck-sort"
                 value={sortOrder}
-                onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+                onChange={(event) => {
+                  triggerHaptic();
+                  setSortOrder(event.target.value as SortOrder);
+                }}
                 className="explorer-sort-select"
                 aria-label="Sort deck results"
               >
@@ -827,7 +940,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
               <button
                 type="button"
                 className="btn btn-secondary sm:hidden"
-                onClick={() => setIsMobileFilterOpen(true)}
+                onClick={openMobileFilters}
                 aria-label="Open filters"
               >
                 Filters
@@ -856,7 +969,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                     <button
                       key={option.id}
                       type="button"
-                      onClick={() => setTrackFilter(option.id)}
+                      onClick={() => applyTrackFilter(option.id)}
                       disabled={isDisabled}
                       aria-pressed={isActive}
                       className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
@@ -896,7 +1009,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                 <div className="explorer-filter-row explorer-filter-row-wrap">
                   <button
                     type="button"
-                    onClick={() => setYearFilter("all")}
+                    onClick={() => applyYearFilter("all")}
                     aria-pressed={resolvedYearFilter === "all"}
                     className={`explorer-filter-pill ${resolvedYearFilter === "all" ? "is-active" : ""}`}
                   >
@@ -906,7 +1019,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                     <button
                       key={yearOption}
                       type="button"
-                      onClick={() => setYearFilter(yearOption)}
+                      onClick={() => applyYearFilter(yearOption)}
                       aria-pressed={resolvedYearFilter === yearOption}
                       className={`explorer-filter-pill ${resolvedYearFilter === yearOption ? "is-active" : ""}`}
                     >
@@ -926,7 +1039,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                       <button
                         key={option.id}
                         type="button"
-                        onClick={() => setSourceFilter(option.id)}
+                        onClick={() => applySourceFilter(option.id)}
                         aria-pressed={isActive}
                         className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
                       >
@@ -937,7 +1050,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
                   <button
                     type="button"
-                    onClick={() => setRepoOnly((previousState) => !previousState)}
+                    onClick={toggleRepoOnly}
                     aria-pressed={repoOnly}
                     className={`explorer-filter-pill explorer-toggle-pill ${repoOnly ? "is-active" : ""}`}
                   >
@@ -948,90 +1061,132 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
             </div>
           </div>
 
-          {hasActiveFilters ? (
-            <div className="explorer-active-filters" role="region" aria-label="Active filters">
-              <p className="explorer-filter-label">Active Filters</p>
-              <div className="explorer-filter-row explorer-filter-row-wrap">
-                {normalizedQuery ? (
-                  <button
-                    type="button"
-                    className="explorer-filter-pill is-active"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    Search: &quot;{searchQuery.trim()}&quot;
-                    <X size={12} />
-                  </button>
-                ) : null}
+          <AnimatePresence initial={false}>
+            {hasActiveFilters ? (
+              <motion.div
+                className="explorer-active-filters"
+                role="region"
+                aria-label="Active filters"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <p className="explorer-filter-label">Active Filters</p>
+                <motion.div layout className="explorer-filter-row explorer-filter-row-wrap">
+                  <AnimatePresence initial={false}>
+                    {normalizedQuery ? (
+                      <motion.button
+                        key={`chip-search-${normalizedQuery}`}
+                        type="button"
+                        className="explorer-filter-pill is-active"
+                        onClick={() => setSearchQuery("")}
+                        layout
+                        {...chipMotion}
+                      >
+                        Search: &quot;{searchQuery.trim()}&quot;
+                        <X size={12} />
+                      </motion.button>
+                    ) : null}
 
-                {resolvedTrackFilter !== "all" ? (
-                  <button
+                    {resolvedTrackFilter !== "all" ? (
+                      <motion.button
+                        key={`chip-track-${resolvedTrackFilter}`}
                     type="button"
                     className="explorer-filter-pill is-active"
-                    onClick={() => setTrackFilter("all")}
-                  >
-                    Track: {activeTrackLabel}
-                    <X size={12} />
-                  </button>
-                ) : null}
+                    onClick={() => applyTrackFilter("all")}
+                        layout
+                        {...chipMotion}
+                      >
+                        Track: {activeTrackLabel}
+                        <X size={12} />
+                      </motion.button>
+                    ) : null}
 
-                {resolvedFocusFilters.map((focusValue) => (
-                  <button
-                    key={focusValue}
-                    type="button"
-                    className="explorer-filter-pill is-active"
-                    onClick={() => toggleFocusFilter(focusValue)}
-                  >
-                    Focus: {focusValue}
-                    <X size={12} />
-                  </button>
-                ))}
+                    {resolvedFocusFilters.map((focusValue) => (
+                      <motion.button
+                        key={`chip-focus-${focusValue}`}
+                        type="button"
+                        className="explorer-filter-pill is-active"
+                        onClick={() => toggleFocusFilter(focusValue)}
+                        layout
+                        {...chipMotion}
+                      >
+                        Focus: {focusValue}
+                        <X size={12} />
+                      </motion.button>
+                    ))}
 
-                {resolvedYearFilter !== "all" ? (
-                  <button
-                    type="button"
-                    className="explorer-filter-pill is-active"
-                    onClick={() => setYearFilter("all")}
-                  >
-                    Year: {resolvedYearFilter}
-                    <X size={12} />
-                  </button>
-                ) : null}
+                    {resolvedYearFilter !== "all" ? (
+                      <motion.button
+                        key={`chip-year-${resolvedYearFilter}`}
+                        type="button"
+                        className="explorer-filter-pill is-active"
+                        onClick={() => applyYearFilter("all")}
+                        layout
+                        {...chipMotion}
+                      >
+                        Year: {resolvedYearFilter}
+                        <X size={12} />
+                      </motion.button>
+                    ) : null}
 
-                {resolvedSourceFilter !== "all" ? (
-                  <button
-                    type="button"
-                    className="explorer-filter-pill is-active"
-                    onClick={() => setSourceFilter("all")}
-                  >
-                    Source: {sourceOptions.find((option) => option.id === resolvedSourceFilter)?.label}
-                    <X size={12} />
-                  </button>
-                ) : null}
+                    {resolvedSourceFilter !== "all" ? (
+                      <motion.button
+                        key={`chip-source-${resolvedSourceFilter}`}
+                        type="button"
+                        className="explorer-filter-pill is-active"
+                        onClick={() => applySourceFilter("all")}
+                        layout
+                        {...chipMotion}
+                      >
+                        Source:{" "}
+                        {
+                          sourceOptions.find((option) => option.id === resolvedSourceFilter)
+                            ?.label
+                        }
+                        <X size={12} />
+                      </motion.button>
+                    ) : null}
 
-                {repoOnly ? (
-                  <button
-                    type="button"
-                    className="explorer-filter-pill is-active"
-                    onClick={() => setRepoOnly(false)}
-                  >
-                    Has Repo
-                    <X size={12} />
-                  </button>
-                ) : null}
+                    {repoOnly ? (
+                      <motion.button
+                        key="chip-repo-only"
+                        type="button"
+                        className="explorer-filter-pill is-active"
+                        onClick={() => {
+                          triggerHaptic();
+                          setRepoOnly(false);
+                        }}
+                        layout
+                        {...chipMotion}
+                      >
+                        Has Repo
+                        <X size={12} />
+                      </motion.button>
+                    ) : null}
 
-                {sortOrder !== "newest" ? (
-                  <button
-                    type="button"
-                    className="explorer-filter-pill is-active"
-                    onClick={() => setSortOrder("newest")}
-                  >
-                    Sort: {activeSortLabel}
-                    <X size={12} />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
+                    {sortOrder !== "newest" ? (
+                      <motion.button
+                        key={`chip-sort-${sortOrder}`}
+                        type="button"
+                        className="explorer-filter-pill is-active"
+                        onClick={() => {
+                          triggerHaptic();
+                          setSortOrder("newest");
+                        }}
+                        layout
+                        {...chipMotion}
+                      >
+                        Sort: {activeSortLabel}
+                        <X size={12} />
+                      </motion.button>
+                    ) : null}
+                  </AnimatePresence>
+                </motion.div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
 
           <div className="explorer-summary">
             <p className="text-sm text-[color:var(--text-base)]">
@@ -1068,29 +1223,63 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
         </div>
       </section>
 
-      {isMobileFilterOpen ? (
-        <>
-          <button
-            type="button"
-            aria-label="Close filters"
-            className="explorer-sheet-backdrop sm:hidden"
-            onClick={() => setIsMobileFilterOpen(false)}
-          />
+      <AnimatePresence>
+        {isMobileFilterOpen ? (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close filters"
+              className="explorer-sheet-backdrop sm:hidden"
+              onClick={() => {
+                triggerHaptic();
+                setIsMobileFilterOpen(false);
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
 
-          <section className="explorer-sheet sm:hidden" role="dialog" aria-modal="true" aria-label="Deck filters">
-            <div className="explorer-sheet-header">
-              <h3 className="text-base font-semibold text-[color:var(--text-strong)]">Filters</h3>
-              <button
-                type="button"
-                className="explorer-search-clear"
-                onClick={() => setIsMobileFilterOpen(false)}
-                aria-label="Close filter panel"
+            <motion.section
+              className="explorer-sheet sm:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Deck filters"
+              initial={{ y: "100%", opacity: 0.9 }}
+              animate={{ y: sheetSnap === "full" ? 0 : sheetHalfOffset, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0.95 }}
+              transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.9 }}
+              drag="y"
+              dragListener={false}
+              dragControls={dragControls}
+              dragConstraints={{ top: 0, bottom: Math.max(220, sheetHalfOffset + 220) }}
+              dragElastic={0.14}
+              onDragEnd={handleSheetDragEnd}
+            >
+              <div
+                className="explorer-sheet-handle"
+                aria-hidden
+                onPointerDown={(event) => dragControls.start(event)}
+              />
+              <div
+                className="explorer-sheet-header"
+                onPointerDown={(event) => dragControls.start(event)}
               >
-                <X size={14} />
-              </button>
-            </div>
+                <h3 className="text-base font-semibold text-[color:var(--text-strong)]">Filters</h3>
+                <button
+                  type="button"
+                  className="explorer-search-clear"
+                  onClick={() => {
+                    triggerHaptic();
+                    setIsMobileFilterOpen(false);
+                  }}
+                  aria-label="Close filter panel"
+                >
+                  <X size={14} />
+                </button>
+              </div>
 
-            <div className="explorer-sheet-content">
+              <div className="explorer-sheet-content">
               <div className="explorer-filter-group">
                 <p className="explorer-filter-label">Track</p>
                 <div className="explorer-filter-row explorer-filter-row-wrap">
@@ -1102,7 +1291,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                       <button
                         key={option.id}
                         type="button"
-                        onClick={() => setTrackFilter(option.id)}
+                        onClick={() => applyTrackFilter(option.id)}
                         disabled={isDisabled}
                         aria-pressed={isActive}
                         className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
@@ -1141,7 +1330,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                 <div className="explorer-filter-row explorer-filter-row-wrap">
                   <button
                     type="button"
-                    onClick={() => setYearFilter("all")}
+                    onClick={() => applyYearFilter("all")}
                     aria-pressed={resolvedYearFilter === "all"}
                     className={`explorer-filter-pill ${resolvedYearFilter === "all" ? "is-active" : ""}`}
                   >
@@ -1151,7 +1340,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                     <button
                       key={yearOption}
                       type="button"
-                      onClick={() => setYearFilter(yearOption)}
+                      onClick={() => applyYearFilter(yearOption)}
                       aria-pressed={resolvedYearFilter === yearOption}
                       className={`explorer-filter-pill ${resolvedYearFilter === yearOption ? "is-active" : ""}`}
                     >
@@ -1171,7 +1360,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                       <button
                         key={option.id}
                         type="button"
-                        onClick={() => setSourceFilter(option.id)}
+                        onClick={() => applySourceFilter(option.id)}
                         aria-pressed={isActive}
                         className={`explorer-filter-pill ${isActive ? "is-active" : ""}`}
                       >
@@ -1182,7 +1371,7 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
 
                   <button
                     type="button"
-                    onClick={() => setRepoOnly((previousState) => !previousState)}
+                    onClick={toggleRepoOnly}
                     aria-pressed={repoOnly}
                     className={`explorer-filter-pill explorer-toggle-pill ${repoOnly ? "is-active" : ""}`}
                   >
@@ -1190,19 +1379,27 @@ export function DeckExplorer({ collections }: DeckExplorerProps) {
                   </button>
                 </div>
               </div>
-            </div>
+              </div>
 
-            <div className="explorer-sheet-actions">
-              <button type="button" className="btn btn-ghost" onClick={resetFilters}>
-                Reset
-              </button>
-              <button type="button" className="btn btn-primary" onClick={() => setIsMobileFilterOpen(false)}>
-                Apply Filters
-              </button>
-            </div>
-          </section>
-        </>
-      ) : null}
+              <div className="explorer-sheet-actions">
+                <button type="button" className="btn btn-ghost" onClick={resetFilters}>
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    triggerHaptic();
+                    setIsMobileFilterOpen(false);
+                  }}
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </motion.section>
+          </>
+        ) : null}
+      </AnimatePresence>
 
       <div ref={resultsRef} className="explorer-results-anchor" aria-hidden />
 

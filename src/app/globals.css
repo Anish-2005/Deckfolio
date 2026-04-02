@@ -535,6 +535,7 @@ a {
   justify-content: center;
   min-width: 1.2rem;
   height: 1.2rem;
+  overflow: hidden;
   border-radius: 999px;
   padding-inline: 0.35rem;
   border: 1px solid var(--line-soft);
@@ -615,12 +616,18 @@ a {
   font-size: 0.74rem;
   font-weight: 650;
   line-height: 1.2;
-  transition: border-color 170ms ease, background-color 170ms ease, color 170ms ease;
+  transition: border-color 170ms ease, background-color 170ms ease, color 170ms ease,
+    transform 120ms ease, box-shadow 140ms ease;
 }
 
 .explorer-filter-pill:hover:not(:disabled) {
   border-color: var(--line-strong);
   color: var(--text-strong);
+}
+
+.explorer-filter-pill:active:not(:disabled) {
+  transform: scale(0.975);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-2), transparent 78%);
 }
 
 .explorer-filter-pill:disabled {
@@ -632,6 +639,7 @@ a {
   border-color: color-mix(in srgb, var(--brand-2), transparent 52%);
   background: color-mix(in srgb, var(--brand-2), transparent 84%);
   color: var(--text-strong);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--brand-2), transparent 84%);
 }
 
 .explorer-toggle-pill {
@@ -775,6 +783,8 @@ a {
   bottom: 0;
   z-index: 100;
   max-height: 84vh;
+  touch-action: pan-y;
+  overscroll-behavior: none;
   padding-bottom: var(--safe-bottom);
   border-top-left-radius: 1.15rem;
   border-top-right-radius: 1.15rem;
@@ -783,6 +793,15 @@ a {
   box-shadow: var(--shadow-lg);
   display: grid;
   grid-template-rows: auto 1fr auto;
+}
+
+.explorer-sheet-handle {
+  width: 2.6rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line-strong), transparent 14%);
+  margin: 0.58rem auto 0.3rem;
+  cursor: grab;
 }
 
 .explorer-sheet-header {
@@ -795,6 +814,8 @@ a {
 
 .explorer-sheet-content {
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 0.85rem 1rem 1rem;
   display: grid;
   gap: 0.95rem;
